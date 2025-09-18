@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file matrix_structure.cpp
  * \brief Main subroutines for doing the sparse structures.
  * \author - Original Author: Aerospace Design Laboratory (Stanford University) <http://su2.stanford.edu>.
@@ -28,11 +28,11 @@
 CSysMatrix::CSysMatrix(void) {
   
   /*--- Array initialization ---*/
-	matrix            = NULL;
-	row_ptr           = NULL;
-	col_ind           = NULL;
-	block             = NULL;
-	prod_block_vector = NULL;
+    matrix            = NULL;
+    row_ptr           = NULL;
+    col_ind           = NULL;
+    block             = NULL;
+    prod_block_vector = NULL;
     prod_row_vector   = NULL;
     aux_vector        = NULL;
     invM              = NULL;
@@ -68,28 +68,28 @@ CSysMatrix::~CSysMatrix(void) {
 }
 
 void CSysMatrix::Initialize(int n_verts, int n_verts_global, int n_var, int n_eqns, array<array<int> > &v2e, array<int> &v2n_e, array<int> &e2v) {
-	unsigned long iPoint, *row_ptr, *col_ind, *vneighs, index, nnz;
+    unsigned long iPoint, *row_ptr, *col_ind, *vneighs, index, nnz;
     unsigned short iNeigh, nNeigh, Max_nNeigh, iEdge;
 
     nPoint = n_verts;              // Assign number of points in the mesh (on processor)
 
-	/*--- Don't delete *row_ptr, *col_ind because they are asigned to the Jacobian structure. ---*/
-	row_ptr = new unsigned long [nPoint+1];
-	row_ptr[0] = 0;
-	for (iPoint = 0; iPoint < nPoint; iPoint++)
+    /*--- Don't delete *row_ptr, *col_ind because they are asigned to the Jacobian structure. ---*/
+    row_ptr = new unsigned long [nPoint+1];
+    row_ptr[0] = 0;
+    for (iPoint = 0; iPoint < nPoint; iPoint++)
         row_ptr[iPoint+1] = row_ptr[iPoint]+(v2n_e(iPoint)+1); // +1 -> to include diagonal element
-	nnz = row_ptr[nPoint];
+    nnz = row_ptr[nPoint];
   
-	col_ind = new unsigned long [nnz];
+    col_ind = new unsigned long [nnz];
   
     Max_nNeigh = 0;
     for (iPoint = 0; iPoint < nPoint; iPoint++) {
         nNeigh = v2n_e(iPoint);
         if (nNeigh > Max_nNeigh) Max_nNeigh = nNeigh;
     }
-	vneighs = new unsigned long [Max_nNeigh+1]; // +1 -> to include diagonal
+    vneighs = new unsigned long [Max_nNeigh+1]; // +1 -> to include diagonal
   
-	for (iPoint = 0; iPoint < nPoint; iPoint++) {
+    for (iPoint = 0; iPoint < nPoint; iPoint++) {
         nNeigh = v2n_e(iPoint);
         for (iNeigh = 0; iNeigh < nNeigh; iNeigh++) {
             iEdge = v2e(iPoint)(iNeigh);
@@ -99,14 +99,14 @@ void CSysMatrix::Initialize(int n_verts, int n_verts_global, int n_var, int n_eq
                 vneighs[iNeigh] = e2v(iEdge,0);
             }
         }
-		vneighs[nNeigh] = iPoint;
-		sort(vneighs,vneighs+nNeigh+1);
-		index = row_ptr[iPoint];
-		for (iNeigh = 0; iNeigh <= nNeigh; iNeigh++) {
-			col_ind[index] = vneighs[iNeigh];
-			index++;
-		}
-	}
+        vneighs[nNeigh] = iPoint;
+        std::sort(vneighs,vneighs+nNeigh+1);
+        index = row_ptr[iPoint];
+        for (iNeigh = 0; iNeigh <= nNeigh; iNeigh++) {
+            col_ind[index] = vneighs[iNeigh];
+            index++;
+        }
+    }
   
     /*--- Set the indices in the in the sparce matrix structure ---*/
     SetIndexes(n_verts, n_verts_global, n_var, n_eqns, row_ptr, col_ind, nnz);
@@ -114,7 +114,7 @@ void CSysMatrix::Initialize(int n_verts, int n_verts_global, int n_var, int n_eq
     /*--- Initialization to zero ---*/
     SetValZero();
   
-	delete[] vneighs;
+    delete[] vneighs;
 }
 
 void CSysMatrix::SetIndexes(int n_verts, int n_verts_global, int n_var, int n_eqns, unsigned long* val_row_ptr, unsigned long* val_col_ind, unsigned long val_nnz) {
@@ -123,10 +123,10 @@ void CSysMatrix::SetIndexes(int n_verts, int n_verts_global, int n_var, int n_eq
     nPointDomain = n_verts_global;  // Assign number of points in the mesh (across all procs)
     nVar = n_var;                  // Assign number of vars in each block system
     nEqn = n_eqns;                   // Assign number of eqns in each block system
-	nnz = val_nnz;                    // Assign number of possible non zero blocks
-	row_ptr = val_row_ptr;
-	col_ind = val_col_ind;
-	
+    nnz = val_nnz;                    // Assign number of possible non zero blocks
+    row_ptr = val_row_ptr;
+    col_ind = val_col_ind;
+    
     matrix            = new double [nnz*nVar*nEqn];	// Reserve memory for the values of the matrix
     block             = new double [nVar*nEqn];
     prod_block_vector = new double [nEqn];
@@ -146,182 +146,182 @@ void CSysMatrix::SetIndexes(int n_verts, int n_verts_global, int n_var, int n_eq
 }
 
 void CSysMatrix::GetBlock(unsigned long block_i, unsigned long block_j) {
-	unsigned long step = 0, index, iVar;
-	
-	for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+    unsigned long step = 0, index, iVar;
+    
+    for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
         //step++;
-		if (col_ind[index] == block_j) {
-			for (iVar = 0; iVar < nVar*nEqn; iVar++)
+        if (col_ind[index] == block_j) {
+            for (iVar = 0; iVar < nVar*nEqn; iVar++)
                 //block[iVar] = matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar];
                 block[iVar] = matrix[(index)*nVar*nEqn+iVar];
-			break;
-		}
-	}
+            break;
+        }
+    }
 }
 
 void CSysMatrix::DisplayBlock(void) {
-	unsigned short iVar, jVar;
-	
-	for (iVar = 0; iVar < nVar; iVar++) {
-		for (jVar = 0; jVar < nEqn; jVar++)
-			cout << block[iVar*nEqn+jVar] << "  ";
-		cout << endl;
-	}
+    unsigned short iVar, jVar;
+    
+    for (iVar = 0; iVar < nVar; iVar++) {
+        for (jVar = 0; jVar < nEqn; jVar++)
+            std::cout << block[iVar*nEqn+jVar] << "  ";
+        std::cout << std::endl;
+    }
 }
 
 void CSysMatrix::ReturnBlock(double **val_block) {
-	unsigned short iVar, jVar;
-	for (iVar = 0; iVar < nVar; iVar++)
-		for (jVar = 0; jVar < nEqn; jVar++)
-			val_block[iVar][jVar] = block[iVar*nEqn+jVar];
+    unsigned short iVar, jVar;
+    for (iVar = 0; iVar < nVar; iVar++)
+        for (jVar = 0; jVar < nEqn; jVar++)
+            val_block[iVar][jVar] = block[iVar*nEqn+jVar];
 }
 
 void CSysMatrix::SetBlock(unsigned long block_i, unsigned long block_j, double **val_block) {
-	unsigned long iVar, jVar, index, step = 0;
-	
-	for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
-		step++;
-		if (col_ind[index] == block_j) {
-			for (iVar = 0; iVar < nVar; iVar++)
-				for (jVar = 0; jVar < nEqn; jVar++)
-					matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar*nEqn+jVar] = val_block[iVar][jVar];
-			break;
-		}
-	}
+    unsigned long iVar, jVar, index, step = 0;
+    
+    for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+        step++;
+        if (col_ind[index] == block_j) {
+            for (iVar = 0; iVar < nVar; iVar++)
+                for (jVar = 0; jVar < nEqn; jVar++)
+                    matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar*nEqn+jVar] = val_block[iVar][jVar];
+            break;
+        }
+    }
 }
 
 void CSysMatrix::AddBlock(unsigned long block_i, unsigned long block_j, double **val_block) {
-	unsigned long iVar, jVar, index, step = 0;
-	
-	for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
-		step++;
-		if (col_ind[index] == block_j) {
-			for (iVar = 0; iVar < nVar; iVar++)
-				for (jVar = 0; jVar < nEqn; jVar++)
-					matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar*nEqn+jVar] += val_block[iVar][jVar];
-			break;
-		}
-	}
+    unsigned long iVar, jVar, index, step = 0;
+    
+    for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+        step++;
+        if (col_ind[index] == block_j) {
+            for (iVar = 0; iVar < nVar; iVar++)
+                for (jVar = 0; jVar < nEqn; jVar++)
+                    matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar*nEqn+jVar] += val_block[iVar][jVar];
+            break;
+        }
+    }
 }
 
 void CSysMatrix::AddBlock(unsigned long block_i, unsigned long block_j, array<double> val_block) {
-	unsigned long iVar, jVar, index, step = 0;
-	
-	for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
-		step++;
-		if (col_ind[index] == block_j) {
-			for (iVar = 0; iVar < nVar; iVar++)
-				for (jVar = 0; jVar < nEqn; jVar++)
-					matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar*nEqn+jVar] += val_block(iVar,jVar);
-			break;
-		}
-	}
+    unsigned long iVar, jVar, index, step = 0;
+    
+    for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+        step++;
+        if (col_ind[index] == block_j) {
+            for (iVar = 0; iVar < nVar; iVar++)
+                for (jVar = 0; jVar < nEqn; jVar++)
+                    matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar*nEqn+jVar] += val_block(iVar,jVar);
+            break;
+        }
+    }
 }
 
 void CSysMatrix::SubtractBlock(unsigned long block_i, unsigned long block_j, double **val_block) {
-	unsigned long iVar, jVar, index, step = 0;
-	
-	for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
-		step++;
-		if (col_ind[index] == block_j) {
-			for (iVar = 0; iVar < nVar; iVar++)
-				for (jVar = 0; jVar < nEqn; jVar++)
-					matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar*nEqn+jVar] -= val_block[iVar][jVar];
-			break;
-		}
-	}
+    unsigned long iVar, jVar, index, step = 0;
+    
+    for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+        step++;
+        if (col_ind[index] == block_j) {
+            for (iVar = 0; iVar < nVar; iVar++)
+                for (jVar = 0; jVar < nEqn; jVar++)
+                    matrix[(row_ptr[block_i]+step-1)*nVar*nEqn+iVar*nEqn+jVar] -= val_block[iVar][jVar];
+            break;
+        }
+    }
 }
 
 void CSysMatrix::AddVal2Diag(unsigned long block_i, double val_matrix) {
-	unsigned long step = 0, iVar, index;
-	
-	for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
-		step++;
-		if (col_ind[index] == block_i) {	// Only elements on the diagonal
-			for (iVar = 0; iVar < nVar; iVar++)
-				matrix[(row_ptr[block_i]+step-1)*nVar*nVar+iVar*nVar+iVar] += val_matrix;
-			break;
-		}
-	}
+    unsigned long step = 0, iVar, index;
+    
+    for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+        step++;
+        if (col_ind[index] == block_i) {	// Only elements on the diagonal
+            for (iVar = 0; iVar < nVar; iVar++)
+                matrix[(row_ptr[block_i]+step-1)*nVar*nVar+iVar*nVar+iVar] += val_matrix;
+            break;
+        }
+    }
 }
 
 void CSysMatrix::AddVal2Diag(unsigned long block_i,  double* val_matrix, unsigned short num_dim) {
-	unsigned long step = 0, iVar, iSpecies;
-	
-	for (unsigned long index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
-		step++;
-		if (col_ind[index] == block_i) {	// Only elements on the diagonal
-			for (iVar = 0; iVar < nVar; iVar++) {
-				iSpecies = iVar/(num_dim + 2);
-				matrix[(row_ptr[block_i]+step-1)*nVar*nVar+iVar*nVar+iVar] += val_matrix[iSpecies];
-			}
-			break;
-		}
-	}
+    unsigned long step = 0, iVar, iSpecies;
+    
+    for (unsigned long index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+        step++;
+        if (col_ind[index] == block_i) {	// Only elements on the diagonal
+            for (iVar = 0; iVar < nVar; iVar++) {
+                iSpecies = iVar/(num_dim + 2);
+                matrix[(row_ptr[block_i]+step-1)*nVar*nVar+iVar*nVar+iVar] += val_matrix[iSpecies];
+            }
+            break;
+        }
+    }
 }
 
 void CSysMatrix::AddVal2Diag(unsigned long block_i,  double* val_matrix, unsigned short val_nDim, unsigned short val_nDiatomics) {
-	unsigned long step = 0, iVar, iSpecies;
-	
-	for (unsigned long index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
-		step++;
-		if (col_ind[index] == block_i) {	// Only elements on the diagonal
-			for (iVar = 0; iVar < nVar; iVar++) {
+    unsigned long step = 0, iVar, iSpecies;
+    
+    for (unsigned long index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+        step++;
+        if (col_ind[index] == block_i) {	// Only elements on the diagonal
+            for (iVar = 0; iVar < nVar; iVar++) {
         if (iVar < (val_nDim+3)*val_nDiatomics) iSpecies = iVar / (val_nDim+3);
         else iSpecies = (iVar - (val_nDim+3)*val_nDiatomics) / (val_nDim+2) + val_nDiatomics;
-				matrix[(row_ptr[block_i]+step-1)*nVar*nVar+iVar*nVar+iVar] += val_matrix[iSpecies];
-			}
-			break;
-		}
-	}
+                matrix[(row_ptr[block_i]+step-1)*nVar*nVar+iVar*nVar+iVar] += val_matrix[iSpecies];
+            }
+            break;
+        }
+    }
 }
 
 
 void CSysMatrix::DeleteValsRowi(unsigned long i) {
-	unsigned long block_i = i/nVar;
-	unsigned long row = i - block_i*nVar;
-	unsigned long index, iVar;
+    unsigned long block_i = i/nVar;
+    unsigned long row = i - block_i*nVar;
+    unsigned long index, iVar;
   
-	for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
-		for (iVar = 0; iVar < nVar; iVar++)
-			matrix[index*nVar*nVar+row*nVar+iVar] = 0.0; // Delete row values in the block
-		if (col_ind[index] == block_i)
-			matrix[index*nVar*nVar+row*nVar+row] = 1.0; // Set 1 to the diagonal element
-	}
+    for (index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++) {
+        for (iVar = 0; iVar < nVar; iVar++)
+            matrix[index*nVar*nVar+row*nVar+iVar] = 0.0; // Delete row values in the block
+        if (col_ind[index] == block_i)
+            matrix[index*nVar*nVar+row*nVar+row] = 1.0; // Set 1 to the diagonal element
+    }
 }
 
 double CSysMatrix::SumAbsRowi(unsigned long i) {
-	unsigned long block_i = i/nVar;
-	unsigned long row = i - block_i*nVar;
+    unsigned long block_i = i/nVar;
+    unsigned long row = i - block_i*nVar;
   
-	double sum = 0;
-	for (unsigned long index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++)
-		for (unsigned long iVar = 0; iVar < nVar; iVar ++)
-			sum += fabs(matrix[index*nVar*nVar+row*nVar+iVar]);
+    double sum = 0;
+    for (unsigned long index = row_ptr[block_i]; index < row_ptr[block_i+1]; index++)
+        for (unsigned long iVar = 0; iVar < nVar; iVar ++)
+            sum += fabs(matrix[index*nVar*nVar+row*nVar+iVar]);
   
-	return sum;
+    return sum;
 }
 
 void CSysMatrix::Gauss_Elimination(unsigned long block_i, double* rhs) {
-	unsigned short jVar, kVar;
-	short iVar;
-	double weight, aux;
+    unsigned short jVar, kVar;
+    short iVar;
+    double weight, aux;
   
-	GetBlock(block_i, block_i);
+    GetBlock(block_i, block_i);
   
-	if (nVar == 1) {
-    if (fabs(block[0]) < eps) cout <<"Gauss' elimination error, value:" << abs(block[0]) << "." << endl;
-		rhs[0] /= block[0];
+    if (nVar == 1) {
+    if (fabs(block[0]) < eps) std::cout <<"Gauss' elimination error, value:" << abs(block[0]) << "." << std::endl;
+        rhs[0] /= block[0];
     }
-	else {
+    else {
 
-    //cout << "Performing Gauss Elimination to get UT matrix" << endl;
-    /*cout << "Block (" << block_i << "," << block_i << "):" << endl;
+    //std::cout << "Performing Gauss Elimination to get UT matrix" << std::endl;
+    /*std::cout << "Block (" << block_i << "," << block_i << "):" << std::endl;
     DisplayBlock();*/
     /*--- Transform system in Upper Matrix ---*/
     for (iVar = 1; iVar < (short)nVar; iVar++) {
       for (jVar = 0; jVar < iVar; jVar++) {
-        if (fabs(block[jVar*nVar+jVar]) < eps) cout <<"Gauss' elimination error, value:" << fabs(block[jVar*nVar+jVar]) << "." << endl;
+        if (fabs(block[jVar*nVar+jVar]) < eps) std::cout <<"Gauss' elimination error, value:" << fabs(block[jVar*nVar+jVar]) << "." << std::endl;
         weight = block[iVar*nVar+jVar] / block[jVar*nVar+jVar];
         for (kVar = jVar; kVar < nVar; kVar++)
           block[iVar*nVar+kVar] -= weight*block[jVar*nVar+kVar];
@@ -330,120 +330,120 @@ void CSysMatrix::Gauss_Elimination(unsigned long block_i, double* rhs) {
     }
     
     /*--- Backwards substitution ---*/
-    if (fabs(block[nVar*nVar-1]) < eps) cout <<"Gauss' elimination error, value:" << fabs(block[nVar*nVar-1]) << "." << endl;
+    if (fabs(block[nVar*nVar-1]) < eps) std::cout <<"Gauss' elimination error, value:" << fabs(block[nVar*nVar-1]) << "." << std::endl;
     rhs[nVar-1] = rhs[nVar-1] / block[nVar*nVar-1];
     for (iVar = nVar-2; iVar >= 0; iVar--) {
       aux = 0.0;
       for (jVar = iVar+1; jVar < nVar; jVar++)
         aux += block[iVar*nVar+jVar]*rhs[jVar];
-      if (fabs(block[iVar*nVar+iVar]) < eps) cout <<"Gauss' elimination error, value:" << fabs(block[iVar*nVar+iVar]) << "." << endl;
+      if (fabs(block[iVar*nVar+iVar]) < eps) std::cout <<"Gauss' elimination error, value:" << fabs(block[iVar*nVar+iVar]) << "." << std::endl;
       rhs[iVar] = (rhs[iVar]-aux) / block[iVar*nVar+iVar];
       if (iVar == 0) break;
     }
-	}
+    }
 }
 
 void CSysMatrix::Gauss_Elimination(double* Block, double* rhs) {
-	unsigned short jVar, kVar;
-	short iVar;
-	double weight;
+    unsigned short jVar, kVar;
+    short iVar;
+    double weight;
   double aux;
   
-	/*--- Copy block matrix, note that the original matrix
-	 is modified by the algorithm---*/
-	for (kVar = 0; kVar < nVar; kVar++)
-		for (jVar = 0; jVar < nVar; jVar++)
-			block[kVar*nVar+jVar] = Block[kVar*nVar+jVar];
+    /*--- Copy block matrix, note that the original matrix
+     is modified by the algorithm---*/
+    for (kVar = 0; kVar < nVar; kVar++)
+        for (jVar = 0; jVar < nVar; jVar++)
+            block[kVar*nVar+jVar] = Block[kVar*nVar+jVar];
   
   
-	if (nVar == 1) {
-    if (fabs(block[0]) < eps) cout <<"Gauss' elimination error." << endl;
-		rhs[0] /= block[0];
+    if (nVar == 1) {
+    if (fabs(block[0]) < eps) std::cout <<"Gauss' elimination error." << std::endl;
+        rhs[0] /= block[0];
   }
-	else {
-		/*--- Transform system in Upper Matrix ---*/
-		for (iVar = 1; iVar < (short)nVar; iVar++) {
-			for (jVar = 0; jVar < iVar; jVar++) {
-        if (fabs(block[jVar*nVar+jVar]) < eps) cout <<"Gauss' elimination error." << endl;
-				weight = block[iVar*nVar+jVar] / block[jVar*nVar+jVar];
-				for (kVar = jVar; kVar < nVar; kVar++)
-					block[iVar*nVar+kVar] -= weight*block[jVar*nVar+kVar];
-				rhs[iVar] -= weight*rhs[jVar];
-			}
-		}
-		
-		/*--- Backwards substitution ---*/
-    if (fabs(block[nVar*nVar-1]) < eps) cout <<"Gauss' elimination error." << endl;
-		rhs[nVar-1] = rhs[nVar-1] / block[nVar*nVar-1];
-		for (iVar = nVar-2; iVar >= 0; iVar--) {
-			aux = 0.0;
-			for (jVar = iVar+1; jVar < nVar; jVar++)
-				aux += block[iVar*nVar+jVar]*rhs[jVar];
-      if (fabs(block[iVar*nVar+iVar]) < eps) cout <<"Gauss' elimination error." << endl;
-			rhs[iVar] = (rhs[iVar]-aux) / block[iVar*nVar+iVar];
-			if (iVar == 0) break;
-		}
-	}
-	
+    else {
+        /*--- Transform system in Upper Matrix ---*/
+        for (iVar = 1; iVar < (short)nVar; iVar++) {
+            for (jVar = 0; jVar < iVar; jVar++) {
+        if (fabs(block[jVar*nVar+jVar]) < eps) std::cout <<"Gauss' elimination error." << std::endl;
+                weight = block[iVar*nVar+jVar] / block[jVar*nVar+jVar];
+                for (kVar = jVar; kVar < nVar; kVar++)
+                    block[iVar*nVar+kVar] -= weight*block[jVar*nVar+kVar];
+                rhs[iVar] -= weight*rhs[jVar];
+            }
+        }
+        
+        /*--- Backwards substitution ---*/
+    if (fabs(block[nVar*nVar-1]) < eps) std::cout <<"Gauss' elimination error." << std::endl;
+        rhs[nVar-1] = rhs[nVar-1] / block[nVar*nVar-1];
+        for (iVar = nVar-2; iVar >= 0; iVar--) {
+            aux = 0.0;
+            for (jVar = iVar+1; jVar < nVar; jVar++)
+                aux += block[iVar*nVar+jVar]*rhs[jVar];
+      if (fabs(block[iVar*nVar+iVar]) < eps) std::cout <<"Gauss' elimination error." << std::endl;
+            rhs[iVar] = (rhs[iVar]-aux) / block[iVar*nVar+iVar];
+            if (iVar == 0) break;
+        }
+    }
+    
 }
 
 void CSysMatrix::ProdBlockVector(unsigned long block_i, unsigned long block_j, const CSysVector & vec) {
-	unsigned long j = block_j*nVar;
-	unsigned short iVar, jVar;
+    unsigned long j = block_j*nVar;
+    unsigned short iVar, jVar;
   
-	GetBlock(block_i, block_j);
+    GetBlock(block_i, block_j);
   
-	for (iVar = 0; iVar < nVar; iVar++) {
-		prod_block_vector[iVar] = 0;
-		for (jVar = 0; jVar < nVar; jVar++)
-			prod_block_vector[iVar] += block[iVar*nVar+jVar]*vec[j+jVar];
-	}
+    for (iVar = 0; iVar < nVar; iVar++) {
+        prod_block_vector[iVar] = 0;
+        for (jVar = 0; jVar < nVar; jVar++)
+            prod_block_vector[iVar] += block[iVar*nVar+jVar]*vec[j+jVar];
+    }
 }
 
 void CSysMatrix::UpperProduct(CSysVector & vec, unsigned long row_i) {
-	unsigned long iVar, index;
+    unsigned long iVar, index;
   
-	for (iVar = 0; iVar < nVar; iVar++)
-		prod_row_vector[iVar] = 0;
+    for (iVar = 0; iVar < nVar; iVar++)
+        prod_row_vector[iVar] = 0;
   
-	for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
-		if (col_ind[index] > row_i) {
-			ProdBlockVector(row_i, col_ind[index], vec);
-			for (iVar = 0; iVar < nVar; iVar++)
-				prod_row_vector[iVar] += prod_block_vector[iVar];
-		}
-	}
+    for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
+        if (col_ind[index] > row_i) {
+            ProdBlockVector(row_i, col_ind[index], vec);
+            for (iVar = 0; iVar < nVar; iVar++)
+                prod_row_vector[iVar] += prod_block_vector[iVar];
+        }
+    }
 }
 
 void CSysMatrix::LowerProduct(CSysVector & vec, unsigned long row_i) {
-	unsigned long iVar, index;
+    unsigned long iVar, index;
   
-	for (iVar = 0; iVar < nVar; iVar++)
-		prod_row_vector[iVar] = 0;
+    for (iVar = 0; iVar < nVar; iVar++)
+        prod_row_vector[iVar] = 0;
   
-	for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
-		if (col_ind[index] < row_i) {
-			ProdBlockVector(row_i, col_ind[index], vec);
-			for (iVar = 0; iVar < nVar; iVar++)
-				prod_row_vector[iVar] += prod_block_vector[iVar];
-		}
-	}
+    for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
+        if (col_ind[index] < row_i) {
+            ProdBlockVector(row_i, col_ind[index], vec);
+            for (iVar = 0; iVar < nVar; iVar++)
+                prod_row_vector[iVar] += prod_block_vector[iVar];
+        }
+    }
   
 }
 
 void CSysMatrix::DiagonalProduct(CSysVector & vec, unsigned long row_i) {
-	unsigned long iVar, index;
+    unsigned long iVar, index;
   
-	for (iVar = 0; iVar < nVar; iVar++)
-		prod_row_vector[iVar] = 0;
+    for (iVar = 0; iVar < nVar; iVar++)
+        prod_row_vector[iVar] = 0;
   
-	for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
-		if (col_ind[index] == row_i) {
-			ProdBlockVector(row_i,col_ind[index],vec);
-			for (iVar = 0; iVar < nVar; iVar++)
-				prod_row_vector[iVar] += prod_block_vector[iVar];
-		}
-	}
+    for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
+        if (col_ind[index] == row_i) {
+            ProdBlockVector(row_i,col_ind[index],vec);
+            for (iVar = 0; iVar < nVar; iVar++)
+                prod_row_vector[iVar] += prod_block_vector[iVar];
+        }
+    }
 }
 
 #ifdef foo
@@ -462,12 +462,12 @@ void CSysMatrix::SendReceive_Solution(CSysVector & x, solution *FlowSol) {
         // only used in serial if perodic boundaries
         if ((config->GetMarker_All_Boundary(iMarker) == SEND_RECEIVE) &&
         (config->GetMarker_All_SendRecv(iMarker) > 0)) {
-			
+            
             MarkerS = iMarker;  MarkerR = iMarker+1;
       
       send_to = config->GetMarker_All_SendRecv(MarkerS)-1;
             receive_from = abs(config->GetMarker_All_SendRecv(MarkerR))-1;
-			
+            
             nVertexS = FlowSol->nVertex[MarkerS];  nVertexR = FlowSol->nVertex[MarkerR];
             nBufferS_Vector = nVertexS*nVar;        nBufferR_Vector = nVertexR*nVar;
       
@@ -522,122 +522,122 @@ void CSysMatrix::SendReceive_Solution(CSysVector & x, solution *FlowSol) {
 #endif
 
 void CSysMatrix::RowProduct(const CSysVector & vec, unsigned long row_i) {
-	unsigned long iVar, index;
+    unsigned long iVar, index;
   
-	for (iVar = 0; iVar < nVar; iVar++)
-		prod_row_vector[iVar] = 0;
+    for (iVar = 0; iVar < nVar; iVar++)
+        prod_row_vector[iVar] = 0;
   
-	for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
-		ProdBlockVector(row_i, col_ind[index], vec);
-		for (iVar = 0; iVar < nVar; iVar++)
-			prod_row_vector[iVar] += prod_block_vector[iVar];
-	}
+    for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
+        ProdBlockVector(row_i, col_ind[index], vec);
+        for (iVar = 0; iVar < nVar; iVar++)
+            prod_row_vector[iVar] += prod_block_vector[iVar];
+    }
 }
 
 void CSysMatrix::MatrixVectorProduct(const CSysVector & vec, CSysVector & prod) {
-	unsigned long prod_begin, vec_begin, mat_begin, index, iVar, jVar, row_i;
+    unsigned long prod_begin, vec_begin, mat_begin, index, iVar, jVar, row_i;
 
 #ifdef MPI
   MPI_Status status;
   MPI_Request send_request, recv_request;
 #endif
   
-	/*--- Some checks for consistency between CSysMatrix and the CSysVectors ---*/
-	if ( (nVar != vec.GetNVar()) || (nVar != prod.GetNVar()) ) {
-		cerr << "CSysMatrix::MatrixVectorProduct(const CSysVector&, CSysVector): "
-    << "nVar values incompatible." << endl;
-		throw(-1);
-	}
-	if ( (nPoint != vec.GetNBlk()) || (nPoint != prod.GetNBlk()) ) {
-		cerr << "CSysMatrix::MatrixVectorProduct(const CSysVector&, CSysVector): "
-    << "nPoint and nBlk values incompatible." << endl;
-		throw(-1);
-	}
+    /*--- Some checks for consistency between CSysMatrix and the CSysVectors ---*/
+    if ( (nVar != vec.GetNVar()) || (nVar != prod.GetNVar()) ) {
+        std::cerr << "CSysMatrix::MatrixVectorProduct(const CSysVector&, CSysVector): "
+    << "nVar values incompatible." << std::endl;
+        throw(-1);
+    }
+    if ( (nPoint != vec.GetNBlk()) || (nPoint != prod.GetNBlk()) ) {
+        std::cerr << "CSysMatrix::MatrixVectorProduct(const CSysVector&, CSysVector): "
+    << "nPoint and nBlk values incompatible." << std::endl;
+        throw(-1);
+    }
   
-	prod = 0.0; // set all entries of prod to zero
-	for (row_i = 0; row_i < nPointDomain; row_i++) {
-		prod_begin = row_i*nVar; // offset to beginning of block row_i
-		for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
-			vec_begin = col_ind[index]*nVar; // offset to beginning of block col_ind[index]
-			mat_begin = (index*nVar*nVar); // offset to beginning of matrix block[row_i][col_ind[indx]]
-			for (iVar = 0; iVar < nVar; iVar++) {
-				for (jVar = 0; jVar < nVar; jVar++) {
-					prod[(const unsigned int)(prod_begin+iVar)] += matrix[(const unsigned int)(mat_begin+iVar*nVar+jVar)]*vec[(const unsigned int)(vec_begin+jVar)];
-				}
-			}
-		}
-	}
+    prod = 0.0; // set all entries of prod to zero
+    for (row_i = 0; row_i < nPointDomain; row_i++) {
+        prod_begin = row_i*nVar; // offset to beginning of block row_i
+        for (index = row_ptr[row_i]; index < row_ptr[row_i+1]; index++) {
+            vec_begin = col_ind[index]*nVar; // offset to beginning of block col_ind[index]
+            mat_begin = (index*nVar*nVar); // offset to beginning of matrix block[row_i][col_ind[indx]]
+            for (iVar = 0; iVar < nVar; iVar++) {
+                for (jVar = 0; jVar < nVar; jVar++) {
+                    prod[(const unsigned int)(prod_begin+iVar)] += matrix[(const unsigned int)(mat_begin+iVar*nVar+jVar)]*vec[(const unsigned int)(vec_begin+jVar)];
+                }
+            }
+        }
+    }
   
   /*--- MPI Parallelization ---*/
   //SendReceive_Solution(prod, geometry, config);
 }
 
 void CSysMatrix::GetMultBlockBlock(double *c, double *a, double *b) {
-	unsigned long iVar, jVar, kVar;
-	
-	for(iVar = 0; iVar < nVar; iVar++)
-		for(jVar = 0; jVar < nVar; jVar++) {
-			c[iVar*nVar+jVar] = 0.0;
-			for(kVar = 0; kVar < nVar; kVar++)
-				c[iVar*nVar+jVar] += a[iVar*nVar+kVar] * b[kVar*nVar+jVar];
-		}
+    unsigned long iVar, jVar, kVar;
+    
+    for(iVar = 0; iVar < nVar; iVar++)
+        for(jVar = 0; jVar < nVar; jVar++) {
+            c[iVar*nVar+jVar] = 0.0;
+            for(kVar = 0; kVar < nVar; kVar++)
+                c[iVar*nVar+jVar] += a[iVar*nVar+kVar] * b[kVar*nVar+jVar];
+        }
 }
 
 void CSysMatrix::GetMultBlockVector(double *c, double *a, double *b) {
-	unsigned long iVar, jVar;
-	
-	for(iVar = 0; iVar < nVar; iVar++) {
-		c[iVar] =  0.0;
-		for(jVar = 0; jVar < nVar; jVar++)
-			c[iVar] += a[iVar*nVar+jVar] * b[jVar];
-	}
+    unsigned long iVar, jVar;
+    
+    for(iVar = 0; iVar < nVar; iVar++) {
+        c[iVar] =  0.0;
+        for(jVar = 0; jVar < nVar; jVar++)
+            c[iVar] += a[iVar*nVar+jVar] * b[jVar];
+    }
 }
 
 void CSysMatrix::GetSubsBlock(double *c, double *a, double *b) {
-	unsigned long iVar, jVar;
-	
-	for(iVar = 0; iVar < nVar; iVar++)
-		for(jVar = 0; jVar < nVar; jVar++)
-			c[iVar*nVar+jVar] = a[iVar*nVar+jVar] - b[iVar*nVar+jVar];
+    unsigned long iVar, jVar;
+    
+    for(iVar = 0; iVar < nVar; iVar++)
+        for(jVar = 0; jVar < nVar; jVar++)
+            c[iVar*nVar+jVar] = a[iVar*nVar+jVar] - b[iVar*nVar+jVar];
 }
 
 void CSysMatrix::GetSubsVector(double *c, double *a, double *b) {
-	unsigned long iVar;
-	
-	for(iVar = 0; iVar < nVar; iVar++)
-		c[iVar] = a[iVar] - b[iVar];
+    unsigned long iVar;
+    
+    for(iVar = 0; iVar < nVar; iVar++)
+        c[iVar] = a[iVar] - b[iVar];
 }
 
 void CSysMatrix::InverseBlock(double *Block, double *invBlock) {
-	unsigned long iVar, jVar;
+    unsigned long iVar, jVar;
   
-	for (iVar = 0; iVar < nVar; iVar++) {
-		for (jVar = 0; jVar < nVar; jVar++)
-			aux_vector[jVar] = 0.0;
-		aux_vector[iVar] = 1.0;
-		
-		/*--- Compute the i-th column of the inverse matrix ---*/
-		Gauss_Elimination(Block, aux_vector);
-		
-		for (jVar = 0; jVar < nVar; jVar++)
-			invBlock[jVar*nVar+iVar] = aux_vector[jVar];
-	}
-	
+    for (iVar = 0; iVar < nVar; iVar++) {
+        for (jVar = 0; jVar < nVar; jVar++)
+            aux_vector[jVar] = 0.0;
+        aux_vector[iVar] = 1.0;
+        
+        /*--- Compute the i-th column of the inverse matrix ---*/
+        Gauss_Elimination(Block, aux_vector);
+        
+        for (jVar = 0; jVar < nVar; jVar++)
+            invBlock[jVar*nVar+iVar] = aux_vector[jVar];
+    }
+    
 }
 
 void CSysMatrix::InverseDiagonalBlock(unsigned long block_i, double **invBlock) {
-	unsigned long iVar, jVar;
+    unsigned long iVar, jVar;
   
-	for (iVar = 0; iVar < nVar; iVar++) {
-		for (jVar = 0; jVar < nVar; jVar++)
-			aux_vector[jVar] = 0.0;
-		aux_vector[iVar] = 1.0;
+    for (iVar = 0; iVar < nVar; iVar++) {
+        for (jVar = 0; jVar < nVar; jVar++)
+            aux_vector[jVar] = 0.0;
+        aux_vector[iVar] = 1.0;
     
-		/*--- Compute the i-th column of the inverse matrix ---*/
-		Gauss_Elimination(block_i, aux_vector);
-		for (jVar = 0; jVar < nVar; jVar++)
-			invBlock[jVar][iVar] = aux_vector[jVar];
-	}
+        /*--- Compute the i-th column of the inverse matrix ---*/
+        Gauss_Elimination(block_i, aux_vector);
+        for (jVar = 0; jVar < nVar; jVar++)
+            invBlock[jVar][iVar] = aux_vector[jVar];
+    }
   
 }
 
@@ -653,9 +653,9 @@ void CSysMatrix::ComputeLU_SGSPreconditioner(const CSysVector & vec, CSysVector 
       may suffer from convergence degradation but takes advantage of minimal parallelization overhead and good load balance. ---*/
 
     /*--- First part of the symmetric iteration: (D+L).x* = b ---*/
-    /*cout <<"--ComputLU_SGSPreconditioner--" << endl;
-    cout << "n_dims: " << nVar << ", nPointDomain: " << nPointDomain << endl;
-    cout << "--paused--" << endl; cin.get();*/
+    /*std::cout <<"--ComputLU_SGSPreconditioner--" << std::endl;
+    std::cout << "n_dims: " << nVar << ", nPointDomain: " << nPointDomain << std::endl;
+    std::cout << "--paused--" << std::endl; cin.get();*/
     for (iPoint = 0; iPoint < nPointDomain; iPoint++) {
         LowerProduct(prod, iPoint);                                        // Compute L.x*
         for (iVar = 0; iVar < nVar; iVar++)
@@ -664,7 +664,7 @@ void CSysMatrix::ComputeLU_SGSPreconditioner(const CSysVector & vec, CSysVector 
         for (iVar = 0; iVar < nVar; iVar++)
             prod[iPoint*nVar+iVar] = aux_vector[iVar];                       // Assesing x* = solution
         /*if(iPoint%500==0) {
-            cout << "** pause **" << endl;
+            std::cout << "** pause **" << std::endl;
             cin.get();
         }*/
     }

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file solution.h
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -26,7 +26,6 @@
 #pragma once
 
 #include "array.h"
-#include <string>
 #include "input.h"
 #include "eles.h"
 #include "eles_tris.h"
@@ -41,6 +40,8 @@
 #include "mpi.h"
 #include "mpi_inters.h"
 #endif
+
+#include <string>
 
 class int_inters; /*!< Forwards declaration */
 class bdy_inters; /*!< Forwards declaration */
@@ -89,7 +90,7 @@ struct solution {
   
   /*! No-slip wall flux point coordinates for wall models. */
 
-	array< array<double> > loc_noslip_bdy;
+    array< array<double> > loc_noslip_bdy;
 
   /*! Diagnostic output quantities. */
   
@@ -117,7 +118,7 @@ struct solution {
     
   /*! No-slip wall flux point coordinates for wall models. */
 
-	array< array<double> > loc_noslip_bdy_global;
+    array< array<double> > loc_noslip_bdy_global;
 
 #endif
   

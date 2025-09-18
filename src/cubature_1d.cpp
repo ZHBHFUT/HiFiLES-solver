@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file cubature_1d.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -31,7 +31,7 @@
 #include "../include/global.h"
 #include "../include/cubature_1d.h"
 
-using namespace std;
+//using namespace std;
 
 // #### constructors ####
 
@@ -49,12 +49,12 @@ cubature_1d::cubature_1d()
 
 cubature_1d::cubature_1d(int in_order) // set by number of points
 {	
-  ifstream datfile;
+  std::ifstream datfile;
   char buf[BUFSIZ]={""};
   char section_TXT[100], param_TXT[100];
   char* f;
   string filename, param_name, param, ord;
-  istringstream strbuf;
+  std::istringstream strbuf;
   int n_pts_file;
 
   order=in_order;
@@ -68,7 +68,7 @@ cubature_1d::cubature_1d(int in_order) // set by number of points
     //const char* HIFILES_DATADIR = getenv("HIFILES_DATA");
     //filename = HIFILES_DATADIR;
     //filename += "/cubature_1d_new.dat";
-    //cout << filename << endl;
+    //std::cout << filename << std::endl;
 
     if (HIFILES_DIR == NULL)
       FatalError("environment variable HIFILES_HOME is undefined");
@@ -76,7 +76,7 @@ cubature_1d::cubature_1d(int in_order) // set by number of points
     filename = HIFILES_DIR;
     filename += "/data/cubature_1d.dat";
     f = (char*)filename.c_str();
-    datfile.open(f, ifstream::in);
+    datfile.open(f, std::ifstream::in);
     if (!datfile) FatalError("Unable to open cubature file");
     
     // read data from file to arrays
@@ -89,7 +89,7 @@ cubature_1d::cubature_1d(int in_order) // set by number of points
       {
         // get no. of pts
         ord = param_name.substr(6);
-        stringstream str(ord);
+        std::stringstream str(ord);
         str >> n_pts_file;
         
         // if pts matches order, read locs and weights
@@ -149,6 +149,7 @@ cubature_1d& cubature_1d::operator=(const cubature_1d& in_cubature_1d)
       n_pts=in_cubature_1d.n_pts;
       locs=in_cubature_1d.locs;
       weights=in_cubature_1d.weights;
+      return (*this);
     }
 }
 

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file matrix_structure.inl
  * \brief In-Line subroutines of the <i>matrix_structure.hpp</i> file.
  * \author - Original Author: Aerospace Design Laboratory (Stanford University) <http://su2.stanford.edu>.
@@ -42,8 +42,8 @@ inline CSysMatrixVectorProduct::CSysMatrixVectorProduct(CSysMatrix & matrix_ref,
 
 inline void CSysMatrixVectorProduct::operator()(const CSysVector & u, CSysVector & v) const {
   if (sparse_matrix == NULL) {
-    cerr << "CSysMatrixVectorProduct::operator()(const CSysVector &, CSysVector &): " << endl; 
-    cerr << "pointer to sparse matrix is NULL." << endl;
+    std::cerr << "CSysMatrixVectorProduct::operator()(const CSysVector &, CSysVector &): " << std::endl; 
+    std::cerr << "pointer to sparse matrix is NULL." << std::endl;
     throw(-1);
   }
   sparse_matrix->MatrixVectorProduct(u, v);
@@ -58,8 +58,8 @@ inline CJacobiPreconditioner::CJacobiPreconditioner(CSysMatrix & matrix_ref, CGe
 
 inline void CJacobiPreconditioner::operator()(const CSysVector & u, CSysVector & v) const {
   if (sparse_matrix == NULL) {
-    cerr << "CJacobiPreconditioner::operator()(const CSysVector &, CSysVector &): " << endl; 
-    cerr << "pointer to sparse matrix is NULL." << endl;
+    std::cerr << "CJacobiPreconditioner::operator()(const CSysVector &, CSysVector &): " << std::endl; 
+    std::cerr << "pointer to sparse matrix is NULL." << std::endl;
     throw(-1);
   }
   sparse_matrix->ComputeJacobiPreconditioner(u, v, geometry, config);
@@ -72,8 +72,8 @@ inline CLU_SGSPreconditioner::CLU_SGSPreconditioner(CSysMatrix & matrix_ref, sol
 
 inline void CLU_SGSPreconditioner::operator()(const CSysVector & u, CSysVector & v) const {
   if (sparse_matrix == NULL) {
-    cerr << "CLU_SGSPreconditioner::operator()(const CSysVector &, CSysVector &): " << endl; 
-    cerr << "pointer to sparse matrix is NULL." << endl;
+    std::cerr << "CLU_SGSPreconditioner::operator()(const CSysVector &, CSysVector &): " << std::endl; 
+    std::cerr << "pointer to sparse matrix is NULL." << std::endl;
     throw(-1);
   }
   sparse_matrix->ComputeLU_SGSPreconditioner(u, v);
@@ -87,8 +87,8 @@ inline CLineletPreconditioner::CLineletPreconditioner(CSysMatrix & matrix_ref, C
 
 inline void CLineletPreconditioner::operator()(const CSysVector & u, CSysVector & v) const {
   if (sparse_matrix == NULL) {
-    cerr << "CLineletPreconditioner::operator()(const CSysVector &, CSysVector &): " << endl; 
-    cerr << "pointer to sparse matrix is NULL." << endl;
+    std::cerr << "CLineletPreconditioner::operator()(const CSysVector &, CSysVector &): " << std::endl; 
+    std::cerr << "pointer to sparse matrix is NULL." << std::endl;
     throw(-1);
   }
   sparse_matrix->ComputeLineletPreconditioner(u, v, geometry, config);

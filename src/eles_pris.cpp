@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file eles_pris.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,10 +23,6 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iomanip>
-#include <iostream>
-#include <cmath>
-
 #include "../include/global.h"
 #include "../include/eles.h"
 #include "../include/eles_pris.h"
@@ -36,7 +32,11 @@
 #include "../include/cubature_tri.h"
 #include "../include/cubature_quad.h"
 
-using namespace std;
+#include <iomanip>
+#include <iostream>
+#include <cmath>
+
+//using namespace std;
 
 // #### constructors ####
 
@@ -52,7 +52,7 @@ void eles_pris::setup_ele_type_specific()
 {
 
 #ifndef _MPI
-  cout << "Initializing pris" << endl;
+  std::cout << "Initializing pris" << std::endl;
 #endif
 
   ele_type=3;
@@ -617,7 +617,7 @@ void eles_pris::set_tnorm_fpts(void)
             }
         }
     }
-  //cout << "tnorm_fpts" << endl;
+  //std::cout << "tnorm_fpts" << std::endl;
   //tnorm_fpts.print();
 }
 
@@ -652,7 +652,7 @@ void eles_pris::set_vandermonde_tri_restart()
   inv_vandermonde_tri_rest = inv_array(vandermonde_tri_rest);
 }
 
-int eles_pris::read_restart_info(ifstream& restart_file)
+int eles_pris::read_restart_info(std::ifstream& restart_file)
 {
 
   string str;
@@ -697,31 +697,31 @@ int eles_pris::read_restart_info(ifstream& restart_file)
 
 }
 
-void eles_pris::write_restart_info(ofstream& restart_file)        
+void eles_pris::write_restart_info(std::ofstream& restart_file)        
 {
-  restart_file << "PRIS" << endl;
+  restart_file << "PRIS" << std::endl;
 
-  restart_file << "Order" << endl;
-  restart_file << order << endl;
+  restart_file << "Order" << std::endl;
+  restart_file << order << std::endl;
 
-  restart_file << "Number of solution points per prismatic element" << endl;
-  restart_file << n_upts_per_ele << endl;
+  restart_file << "Number of solution points per prismatic element" << std::endl;
+  restart_file << n_upts_per_ele << std::endl;
 
-  restart_file << "Number of solution points in triangle" << endl;
-  restart_file << n_upts_tri << endl;
+  restart_file << "Number of solution points in triangle" << std::endl;
+  restart_file << n_upts_tri << std::endl;
 
-  restart_file << "Location of solution points in 1D" << endl;
+  restart_file << "Location of solution points in 1D" << std::endl;
   for (int i=0;i<order+1;i++) {
       restart_file << loc_upts_pri_1d(i) << " ";
     }
-  restart_file << endl;
+  restart_file << std::endl;
 
-  restart_file << "Location of solution points in triangle" << endl;
+  restart_file << "Location of solution points in triangle" << std::endl;
   for (int i=0;i<n_upts_tri;i++) {
       for (int j=0;j<2;j++) {
           restart_file << loc_upts_pri_tri(j,i) << " ";
         }
-      restart_file << endl;
+      restart_file << std::endl;
     }
 }
 
@@ -1187,7 +1187,7 @@ int eles_pris::face0_map(int index)
             }
         }
     }
-  cout << "Should not be here in face0_map, exiting" << endl;
+  std::cout << "Should not be here in face0_map, exiting" << std::endl;
   exit(1);
 }
 
@@ -1195,7 +1195,8 @@ int eles_pris::face0_map(int index)
 /*! Calculate element volume */
 double eles_pris::calc_ele_vol(double& detjac)
 {
-
+    // Element volume = |Jacobian|*width*height*span of reference element
+    return detjac * 1.0;
 }
 
 /*! Calculate element reference length for timestep calculation */

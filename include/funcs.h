@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file funcs.h
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -25,13 +25,14 @@
 
 #pragma once
 
-#include <cmath>
 #include "array.h"
 
 #if defined _GPU
 #include "cuda_runtime_api.h"
 #include "cusparse_v2.h"
 #endif
+
+#include <cmath>
 
 /*! evaluate lagrange basis */
 double eval_lagrange(double in_r, int in_mode, array<double>& in_loc_pts);

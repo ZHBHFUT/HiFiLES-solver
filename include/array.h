@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file array.h
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -25,13 +25,6 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <iomanip>
-#include <iostream>
-#include <fstream>
-#include <typeinfo>
 #include "error.h"
 
 #ifdef _GPU
@@ -39,6 +32,20 @@
 #include "cuda_runtime_api.h"
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <iomanip>
+#include <iostream>
+#include <fstream>
+#include <typeinfo>
+
+using string = std::string;
+
+template<typename T>
+inline T min(T a, decltype(a) b)noexcept { return std::min(a, b); }
+template<typename T>
+inline T max(T a, decltype(a) b)noexcept { return std::max(a, b); }
 
 template <typename T>
 class array
@@ -163,9 +170,9 @@ protected:
 
 // definitions
 
-#include <iostream>
-
-using namespace std;
+//#include <iostream>
+//
+//using namespace std;
 
 // #### constructors ####
 
@@ -180,6 +187,7 @@ array<T>::array()
   dim_3=1;
 
   cpu_data = new T[dim_0*dim_1*dim_2*dim_3];
+  gpu_data = nullptr;
 
   cpu_flag=1;
   gpu_flag=0;
@@ -196,7 +204,7 @@ array<T>::array(int in_dim_0, int in_dim_1, int in_dim_2, int in_dim_3)
   dim_3=in_dim_3;
 
   cpu_data = new T[dim_0*dim_1*dim_2*dim_3];
-
+  gpu_data = nullptr;
 
   cpu_flag=1;
   gpu_flag=0;
@@ -329,7 +337,7 @@ T* array<T>::get_ptr_gpu(void)
     return gpu_data;
   else
     {
-      cout << "dim_0=" << dim_0 << " dim_1=" << dim_1 << " dim_2=" << dim_2 << endl;
+      std::cout << "dim_0=" << dim_0 << " dim_1=" << dim_1 << " dim_2=" << dim_2 << std::endl;
       FatalError("GPU array does not exist");
     }
 }
@@ -381,7 +389,7 @@ int array<T>::get_dim(int in_dim)
     }
   else
     {
-      cout << "ERROR: Invalid dimension ... " << endl;
+      std::cout << "ERROR: Invalid dimension ... " << std::endl;
       return 0;
     }
 }
@@ -430,7 +438,7 @@ void array<T>::print(void)
       for (k = 0; k< dim_2; k++)
         {
           if (threeD)
-            cout<<endl<<"ans(:,:,"<<k+1<<") = "<<endl;
+            std::cout<<std::endl<<"ans(:,:,"<<k+1<<") = "<<std::endl;
           for(i=0; i<dim_0; i++)
             {
               for(j=0; j<dim_1; j++)
@@ -438,23 +446,23 @@ void array<T>::print(void)
 
                   if((*this)(i,j,k)*(*this)(i,j,k)<1e-12)
                     {
-                      cout << " 0 ";
+                      std::cout << " 0 ";
                     }
                   else
                     {
-                      cout << " " << (*this)(i,j,k) << " ";
+                      std::cout << " " << (*this)(i,j,k) << " ";
                     }
                 }
 
-              cout << endl;
+              std::cout << std::endl;
             }
           if (threeD)
-            cout<<endl;
+            std::cout<<std::endl;
         }
     }
   else
     {
-      cout << "ERROR: Can only print an array of dimension three or less ...." << endl;
+      std::cout << "ERROR: Can only print an array of dimension three or less ...." << std::endl;
     }
 }
 

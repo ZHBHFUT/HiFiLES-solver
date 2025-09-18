@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file eles_hexas.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,9 +23,15 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iomanip>
-#include <iostream>
-#include <cmath>
+#include "../include/global.h"
+#include "../include/eles.h"
+#include "../include/eles_hexas.h"
+#include "../include/array.h"
+#include "../include/funcs.h"
+#include "../include/error.h"
+#include "../include/cubature_1d.h"
+#include "../include/cubature_quad.h"
+#include "../include/cubature_hexa.h"
 
 #if defined _ACCELERATE_BLAS
 #include <Accelerate/Accelerate.h>
@@ -43,17 +49,15 @@ extern "C"
 }
 #endif
 
-#include "../include/global.h"
-#include "../include/eles.h"
-#include "../include/eles_hexas.h"
-#include "../include/array.h"
-#include "../include/funcs.h"
-#include "../include/error.h"
-#include "../include/cubature_1d.h"
-#include "../include/cubature_quad.h"
-#include "../include/cubature_hexa.h"
+#if defined _OPEN_BLAS
+#include "openblas/cblas.h"
+#endif
 
-using namespace std;
+#include <iomanip>
+#include <iostream>
+#include <cmath>
+
+//using namespace std;
 
 // #### constructors ####
 
@@ -67,7 +71,7 @@ eles_hexas::eles_hexas()
 void eles_hexas::setup_ele_type_specific()
 {
 #ifndef _MPI
-  cout << "Initializing hexas" << endl;
+  std::cout << "Initializing hexas" << std::endl;
 #endif
 
   ele_type=4;
@@ -217,7 +221,7 @@ void eles_hexas::set_loc_1d_upts(void)
     }
   else
     {
-      cout << "ERROR: Unknown solution point type.... " << endl;
+      std::cout << "ERROR: Unknown solution point type.... " << std::endl;
     }
 }
 
@@ -430,11 +434,11 @@ void eles_hexas::set_volume_cubpts(void)
       loc_volume_cubpts(1,i) = cub_hexa.get_s(i);
       loc_volume_cubpts(2,i) = cub_hexa.get_t(i);
 
-      //cout << "x=" << loc_volume_cubpts(0,i) << endl;
-      //cout << "y=" << loc_volume_cubpts(1,i) << endl;
-      //cout << "z=" << loc_volume_cubpts(2,i) << endl;
+      //std::cout << "x=" << loc_volume_cubpts(0,i) << std::endl;
+      //std::cout << "y=" << loc_volume_cubpts(1,i) << std::endl;
+      //std::cout << "z=" << loc_volume_cubpts(2,i) << std::endl;
       weight_volume_cubpts(i) = cub_hexa.get_weight(i);
-      //cout << "wgt=" << weight_volume_cubpts(i) << endl;
+      //std::cout << "wgt=" << weight_volume_cubpts(i) << std::endl;
     }
 }
 
@@ -658,7 +662,7 @@ void eles_hexas::compute_filter_upts(void)
   // Only use high-order filters for high enough order
   if(run_input.filter_type==0 and N>=3)
     {
-      if (rank==0) cout<<"Building high-order-commuting Vasilyev filter"<<endl;
+      if (rank==0) std::cout<<"Building high-order-commuting Vasilyev filter"<<std::endl;
       array<double> C(N);
       array<double> A(N,N);
 
@@ -712,7 +716,7 @@ void eles_hexas::compute_filter_upts(void)
     }
   else if(run_input.filter_type==1) // Discrete Gaussian filter
     {
-      if (rank==0) cout<<"Building discrete Gaussian filter"<<endl;
+      if (rank==0) std::cout<<"Building discrete Gaussian filter"<<std::endl;
       int ctype, index;
       double k_R, k_L, coeff;
       double res_0, res_L, res_R;
@@ -789,7 +793,7 @@ void eles_hexas::compute_filter_upts(void)
     }
   else if(run_input.filter_type==2) // Modal coefficient filter
     {
-      if (rank==0) cout<<"Building modal filter"<<endl;
+      if (rank==0) std::cout<<"Building modal filter"<<std::endl;
 
       // Compute restriction-prolongation filter
       compute_modal_filter_1d(filter_upts_1D, vandermonde, inv_vandermonde, N, order);
@@ -801,7 +805,7 @@ void eles_hexas::compute_filter_upts(void)
     }
   else // Simple average for low order
     {
-      if (rank==0) cout<<"Building average filter"<<endl;
+      if (rank==0) std::cout<<"Building average filter"<<std::endl;
       sum=0;
       for (i=0;i<N;i++)
         {
@@ -848,7 +852,7 @@ void eles_hexas::compute_filter_upts(void)
 //#### helper methods ####
 
 
-int eles_hexas::read_restart_info(ifstream& restart_file)
+int eles_hexas::read_restart_info(std::ifstream& restart_file)
 {
 
   string str;
@@ -879,21 +883,21 @@ int eles_hexas::read_restart_info(ifstream& restart_file)
 }
 
 // write restart info
-void eles_hexas::write_restart_info(ofstream& restart_file)        
+void eles_hexas::write_restart_info(std::ofstream& restart_file)        
 {
-  restart_file << "HEXAS" << endl;
+  restart_file << "HEXAS" << std::endl;
 
-  restart_file << "Order" << endl;
-  restart_file << order << endl;
+  restart_file << "Order" << std::endl;
+  restart_file << order << std::endl;
 
-  restart_file << "Number of solution points per hexahedral element" << endl;
-  restart_file << n_upts_per_ele << endl;
+  restart_file << "Number of solution points per hexahedral element" << std::endl;
+  restart_file << n_upts_per_ele << std::endl;
 
-  restart_file << "Location of solution points in 1D" << endl;
+  restart_file << "Location of solution points in 1D" << std::endl;
   for (int i=0;i<order+1;++i) {
       restart_file << loc_1d_upts(i) << " ";
     }
-  restart_file << endl;
+  restart_file << std::endl;
 
 
 
@@ -972,7 +976,7 @@ double eles_hexas::eval_d_nodal_basis(int in_index, int in_cpnt, array<double> i
     }
   else
     {
-      cout << "ERROR: Invalid component requested ... " << endl;
+      std::cout << "ERROR: Invalid component requested ... " << std::endl;
     }
 
   return d_nodal_basis;
@@ -1042,7 +1046,7 @@ double eles_hexas::eval_nodal_s_basis(int in_index, array<double> in_loc, int in
     }
   else
     {
-      cout << "in_n_spts = " << in_n_spts << endl;
+      std::cout << "in_n_spts = " << in_n_spts << std::endl;
       FatalError("Shape basis not implemented yet, exiting");
     }
 

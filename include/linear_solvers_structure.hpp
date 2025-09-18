@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file linear_solvers_structure.hpp
  * \brief Headers for the classes related to linear solvers (CG, FGMRES, etc)
  *        The subroutines and functions are in the <i>linear_solvers_structure.cpp</i> file.
@@ -41,7 +41,7 @@
 #include "vector_structure.hpp"
 #include "solution.h"
 
-using namespace std;
+//using namespace std;
 
 /*!
  * \class CSysSolve
@@ -160,7 +160,7 @@ public:
   unsigned long ConjugateGradient(const CSysVector & b, CSysVector & x, CMatrixVectorProduct & mat_vec,
                                   CPreconditioner & precond, double tol,
                                   unsigned long m, bool monitoring);
-	
+    
   /*!
    * \brief Flexible Generalized Minimal Residual method
    * \param[in] b - the right hand size vector
@@ -174,8 +174,8 @@ public:
   unsigned long FGMRES(const CSysVector & b, CSysVector & x, CMatrixVectorProduct & mat_vec,
                       CPreconditioner & precond, double tol,
                       unsigned long m, bool monitoring, solution *FlowSol);
-	
-	/*!
+    
+    /*!
    * \brief Biconjugate Gradient Stabilized Method (BCGSTAB)
    * \param[in] b - the right hand size vector
    * \param[in,out] x - on entry the intial guess, on exit the solution

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file eles_tris.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,9 +23,14 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iomanip>
-#include <iostream>
-#include <cmath>
+#include "../include/global.h"
+#include "../include/eles.h"
+#include "../include/eles_tris.h"
+#include "../include/array.h"
+#include "../include/funcs.h"
+#include "../include/cubature_1d.h"
+#include "../include/cubature_tri.h"
+
 
 #if defined _ACCELERATE_BLAS
 #include <Accelerate/Accelerate.h>
@@ -43,15 +48,15 @@ extern "C"
 }
 #endif
 
-#include "../include/global.h"
-#include "../include/eles.h"
-#include "../include/eles_tris.h"
-#include "../include/array.h"
-#include "../include/funcs.h"
-#include "../include/cubature_1d.h"
-#include "../include/cubature_tri.h"
+#if defined _OPEN_BLAS
+#include "openblas/cblas.h"
+#endif
 
-using namespace std;
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+
+//using namespace std;
 
 // #### constructors ####
 
@@ -67,7 +72,7 @@ void eles_tris::setup_ele_type_specific()
 {
 
 #ifndef _MPI
-  cout << "Initializing tris" << endl;
+  std::cout << "Initializing tris" << std::endl;
 #endif
 
   ele_type=0;
@@ -212,7 +217,7 @@ void eles_tris::set_loc_upts(void)
     }
   else
     {
-      cout << "ERROR: Unknown solution point location type.... " << endl;
+      std::cout << "ERROR: Unknown solution point location type.... " << std::endl;
     }
   //loc_upts.print();
 }
@@ -243,7 +248,7 @@ void eles_tris::set_tloc_fpts(void)
     }
   else
     {
-      cout << "ERROR: Unknown edge flux point location type.... " << endl;
+      std::cout << "ERROR: Unknown edge flux point location type.... " << std::endl;
     }
 
   for (i=0;i<n_inters_per_ele;i++)
@@ -508,7 +513,7 @@ void eles_tris::set_vandermonde_restart()
 }
 
 /*! read restart info */
-int eles_tris::read_restart_info(ifstream& restart_file)
+int eles_tris::read_restart_info(std::ifstream& restart_file)
 {
 
   string str;
@@ -543,22 +548,22 @@ int eles_tris::read_restart_info(ifstream& restart_file)
 }
 
 // write restart info
-void eles_tris::write_restart_info(ofstream& restart_file)
+void eles_tris::write_restart_info(std::ofstream& restart_file)
 {
-  restart_file << "TRIS" << endl;
+  restart_file << "TRIS" << std::endl;
 
-  restart_file << "Order" << endl;
-  restart_file << order << endl;
+  restart_file << "Order" << std::endl;
+  restart_file << order << std::endl;
 
-  restart_file << "Number of solution points per triangular element" << endl;
-  restart_file << n_upts_per_ele << endl;
+  restart_file << "Number of solution points per triangular element" << std::endl;
+  restart_file << n_upts_per_ele << std::endl;
 
-  restart_file << "Location of solution points in triangular elements" << endl;
+  restart_file << "Location of solution points in triangular elements" << std::endl;
   for (int i=0;i<n_upts_per_ele;i++) {
       for (int j=0;j<n_dims;j++) {
           restart_file << loc_upts(j,i) << " ";
         }
-      restart_file << endl;
+      restart_file << std::endl;
     }
 
 }
@@ -672,7 +677,7 @@ void eles_tris::compute_filter_upts(void)
     {
       //#if defined _ACCELERATE_BLAS || defined _MKL_BLAS || defined _STANDARD_BLAS
 
-      if (rank==0) cout<<"Building discrete Gaussian filter"<<endl;
+      if (rank==0) std::cout<<"Building discrete Gaussian filter"<<std::endl;
       int ctype;
       double k_R, k_L, coeff;
       double res_0, res_L, res_R;
@@ -763,14 +768,14 @@ void eles_tris::compute_filter_upts(void)
     }
   else if(run_input.filter_type==2) // Modal coefficient filter
     {
-      if (rank==0) cout<<"Building modal filter"<<endl;
+      if (rank==0) std::cout<<"Building modal filter"<<std::endl;
 
       // Compute modal filter
       compute_modal_filter_tri(filter_upts, vandermonde, inv_vandermonde, N, order);
     }
   else // Simple average for low order
     {
-      if (rank==0) cout<<"Building average filter"<<endl;
+      if (rank==0) std::cout<<"Building average filter"<<std::endl;
       for(i=0;i<N;i++)
         for(j=0;j<N;j++)
           filter_upts(i,j) = 1.0/N;

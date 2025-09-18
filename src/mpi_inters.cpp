@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file mpi_inters.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,9 +23,6 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <cmath>
-
 #include "../include/global.h"
 #include "../include/array.h"
 #include "../include/inters.h"
@@ -44,7 +41,10 @@
 #include "../include/cuda_kernels.h"
 #endif
 
-using namespace std;
+#include <cmath>
+#include <iostream>
+
+//using namespace std;
 
 // #### constructors ####
 
@@ -300,7 +300,7 @@ void mpi_inters::send_solution()
       int request_count=0;
       for (int p=0;p<nproc;p++) {
           Nout = Nout_proc(p)*n_fpts_per_inter*n_fields;
-          //cout << "rank=" << rank << "p=" << p << "inters_type=" << inters_type << "Nout = " << Nout << endl;
+          //std::cout << "rank=" << rank << "p=" << p << "inters_type=" << inters_type << "Nout = " << Nout << std::endl;
           if (Nout) {
 #ifdef _MPI
               MPI_Isend(out_buffer_disu.get_ptr_cpu(sk),Nout,MPI_DOUBLE,p,inters_type*10000+p   ,MPI_COMM_WORLD,&mpi_out_requests[request_count]);
@@ -679,7 +679,7 @@ void mpi_inters::calculate_common_viscFlux(void)
         }
     }
 
-  //cout << "done viscous mpi" << endl;
+  //std::cout << "done viscous mpi" << std::endl;
 #endif
 
 #ifdef _GPU

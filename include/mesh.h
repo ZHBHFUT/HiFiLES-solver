@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file mesh.h
  * \brief  - Class to control mesh-related activities (motion, adaptation, etc.)
  * \author - Current development: Aerospace Computing Laboratory (ACL) directed
@@ -10,16 +10,6 @@
  */
 
 #pragma once
-
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <string>
-#include <cmath>
-#include <map>
-#include <float.h>
-#include <map>
-#include <set>
 
 #include "global.h"
 #include "input.h"
@@ -45,6 +35,16 @@
 #ifdef _GPU
 #include "../include/util.h"
 #endif
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <cmath>
+#include <map>
+#include <float.h>
+#include <map>
+#include <set>
 
 class mesh
 {
@@ -113,7 +113,7 @@ public:
   array<array<int> > boundPts;
 
   /** Store motion flag for each boundary
-     (currently 0=fixed, 1=moving, -1=volume) */
+     (currently 0=std::fixed, 1=moving, -1=volume) */
   array<int> bound_flags;
 
   /** HiFiLES 'bcflag' for each boundary */

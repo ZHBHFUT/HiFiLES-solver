@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file output.h
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -72,7 +72,7 @@ void compute_error(int in_file_num, struct solution* FlowSol);
 void CalcNormResidual(struct solution* FlowSol);
 
 /*! monitor convergence of residual */
-void HistoryOutput(int in_file_num, clock_t init, ofstream *write_hist, struct solution* FlowSol);
+void HistoryOutput(int in_file_num, clock_t init, std::ofstream *write_hist, struct solution* FlowSol);
 
 /*! check if the solution is bounded !*/
 void check_stability(struct solution* FlowSol);

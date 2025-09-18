@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file eles_tris.h
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -71,10 +71,10 @@ public:
   void setup_ele_type_specific(void);
 
   /*! read restart info */
-  int read_restart_info(ifstream& restart_file);
+  int read_restart_info(std::ifstream& restart_file);
 
   /*! write restart info */
-  void write_restart_info(ofstream& restart_file);
+  void write_restart_info(std::ofstream& restart_file);
 
   /*! Compute interface jacobian determinant on face */
   double compute_inter_detjac_inters_cubpts(int in_inter, array<double> d_pos);

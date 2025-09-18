@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file input.h
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -25,11 +25,15 @@
 
 #pragma once
 
+#include "array.h"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <map>
-#include "array.h"
+
+template<typename T> using vector = std::vector<T>;
+template<typename K, typename V> using map = std::map<K, V>;
 
 class input
 {	
@@ -334,7 +338,7 @@ public:
   void getMap(string optName, map<T, U> &opt);
 
 private:
-  ifstream optFile;
+  std::ifstream optFile;
   string fileName;
 
 };

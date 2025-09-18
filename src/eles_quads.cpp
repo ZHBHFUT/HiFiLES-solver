@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file eles_quads.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,9 +23,13 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iomanip>
-#include <iostream>
-#include <cmath>
+#include "../include/global.h"
+#include "../include/eles.h"
+#include "../include/eles_quads.h"
+#include "../include/array.h"
+#include "../include/funcs.h"
+#include "../include/cubature_1d.h"
+#include "../include/cubature_quad.h"
 
 #if defined _ACCELERATE_BLAS
 #include <Accelerate/Accelerate.h>
@@ -43,15 +47,16 @@ extern "C"
 }
 #endif
 
-#include "../include/global.h"
-#include "../include/eles.h"
-#include "../include/eles_quads.h"
-#include "../include/array.h"
-#include "../include/funcs.h"
-#include "../include/cubature_1d.h"
-#include "../include/cubature_quad.h"
+#if defined _OPEN_BLAS
+#include "openblas/cblas.h"
+#endif
 
-using namespace std;
+#include <iomanip>
+#include <iostream>
+#include <cmath>
+
+
+//using namespace std;
 
 // #### constructors ####
 
@@ -68,7 +73,7 @@ void eles_quads::setup_ele_type_specific()
 {
 
 #ifndef _MPI
-  cout << "Initializing quads" << endl;
+  std::cout << "Initializing quads" << std::endl;
 #endif
 
   ele_type=1;
@@ -213,7 +218,7 @@ void eles_quads::set_loc_1d_upts(void)
     }
   else
     {
-      cout << "ERROR: Unknown solution point type.... " << endl;
+      std::cout << "ERROR: Unknown solution point type.... " << std::endl;
     }
 }
 
@@ -376,10 +381,10 @@ void eles_quads::set_volume_cubpts(void)
     {
       loc_volume_cubpts(0,i) = cub_quad.get_r(i);
       loc_volume_cubpts(1,i) = cub_quad.get_s(i);
-      //cout << "x=" << loc_volume_cubpts(0,i) << endl;
-      //cout << "y=" << loc_volume_cubpts(1,i) << endl;
+      //std::cout << "x=" << loc_volume_cubpts(0,i) << std::endl;
+      //std::cout << "y=" << loc_volume_cubpts(1,i) << std::endl;
       weight_volume_cubpts(i) = cub_quad.get_weight(i);
-      //cout<<"wgt=" << weight_volume_cubpts(i) << endl;
+      //std::cout<<"wgt=" << weight_volume_cubpts(i) << std::endl;
     }
 }
 
@@ -509,7 +514,7 @@ void eles_quads::compute_filter_upts(void)
   // Only use high-order filters for high enough order
   if(run_input.filter_type==0 and N>=3)
     {
-      if (rank==0) cout<<"Building high-order-commuting Vasilyev filter"<<endl;
+      if (rank==0) std::cout<<"Building high-order-commuting Vasilyev filter"<<std::endl;
       array<double> C(N);
       array<double> A(N,N);
 
@@ -564,7 +569,7 @@ void eles_quads::compute_filter_upts(void)
     }
   else if(run_input.filter_type==1) // Discrete Gaussian filter
     {
-      if (rank==0) cout<<"Building discrete Gaussian filter"<<endl;
+      if (rank==0) std::cout<<"Building discrete Gaussian filter"<<std::endl;
       int ctype,index;
       double k_R, k_L, coeff;
       double res_0, res_L, res_R;
@@ -641,7 +646,7 @@ void eles_quads::compute_filter_upts(void)
     }
   else if(run_input.filter_type==2) // Modal coefficient filter
     {
-      if (rank==0) cout<<"Building modal filter"<<endl;
+      if (rank==0) std::cout<<"Building modal filter"<<std::endl;
 
       // Compute modal filter
       compute_modal_filter_1d(filter_upts_1D, vandermonde, inv_vandermonde, N, order);
@@ -653,7 +658,7 @@ void eles_quads::compute_filter_upts(void)
     }
   else // Simple average
     {
-      if (rank==0) cout<<"Building average filter"<<endl;
+      if (rank==0) std::cout<<"Building average filter"<<std::endl;
       sum=0;
       for (i=0;i<N;i++)
         {
@@ -691,7 +696,7 @@ void eles_quads::compute_filter_upts(void)
 
 //#### helper methods ####
 
-int eles_quads::read_restart_info(ifstream& restart_file)
+int eles_quads::read_restart_info(std::ifstream& restart_file)
 {
 
   string str;
@@ -722,21 +727,21 @@ int eles_quads::read_restart_info(ifstream& restart_file)
 }
 
 //
-void eles_quads::write_restart_info(ofstream& restart_file)        
+void eles_quads::write_restart_info(std::ofstream& restart_file)        
 {
-  restart_file << "QUADS" << endl;
+  restart_file << "QUADS" << std::endl;
 
-  restart_file << "Order" << endl;
-  restart_file << order << endl;
+  restart_file << "Order" << std::endl;
+  restart_file << order << std::endl;
 
-  restart_file << "Number of solution points per quadrilateral element" << endl;
-  restart_file << n_upts_per_ele << endl;
+  restart_file << "Number of solution points per quadrilateral element" << std::endl;
+  restart_file << n_upts_per_ele << std::endl;
 
-  restart_file << "Location of solution points in 1D" << endl;
+  restart_file << "Location of solution points in 1D" << std::endl;
   for (int i=0;i<order+1;i++) {
       restart_file << loc_1d_upts(i) << " ";
     }
-  restart_file << endl;
+  restart_file << std::endl;
 
 }
 
@@ -812,7 +817,7 @@ void eles_quads::set_concentration_array()
             concentration_factor(j) = 1;
 
         else
-            cout<<"Concentration factor not setup"<<endl;
+            std::cout<<"Concentration factor not setup"<<std::endl;
         }
 
 
@@ -847,7 +852,7 @@ void eles_quads::set_area_coord(void)
   }
 
   else
-        cout<<"Area coordinate calculation has not yet been implemented for this dimension" << endl;
+        std::cout<<"Area coordinate calculation has not yet been implemented for this dimension" << std::endl;
 }
 
 // evaluate nodal basis
@@ -904,7 +909,7 @@ double eles_quads::eval_d_nodal_basis(int in_index, int in_cpnt, array<double> i
     }
   else
     {
-      cout << "ERROR: Invalid component requested ... " << endl;
+      std::cout << "ERROR: Invalid component requested ... " << std::endl;
     }
 
   return d_nodal_basis;
@@ -948,7 +953,7 @@ double eles_quads::eval_nodal_s_basis(int in_index, array<double> in_loc, int in
     }
   else
     {
-      cout << "Shape basis not implemented yet, exiting" << endl;
+      std::cout << "Shape basis not implemented yet, exiting" << std::endl;
       exit(1);
     }
 
@@ -999,7 +1004,7 @@ void eles_quads::eval_d_nodal_s_basis(array<double> &d_nodal_s_basis, array<doub
     }
   else
     {
-      cout << "Shape basis not implemented yet, exiting" << endl;
+      std::cout << "Shape basis not implemented yet, exiting" << std::endl;
       exit(1);
     }
 
@@ -1035,7 +1040,7 @@ double eles_quads::eval_legendre_basis_2D_hierarchical(int in_mode, array<double
           }
         else
           {
-            cout << "ERROR: Invalid mode when evaluating Legendre basis ...." << endl;
+            std::cout << "ERROR: Invalid mode when evaluating Legendre basis ...." << std::endl;
           }
 
         return leg_basis;
@@ -1065,7 +1070,7 @@ double eles_quads::exponential_filter(int in_mode, int in_basis_order)
                           {
                             eta = (double)(i+j)/n_dof;
                             sigma = exp(-1*pow(eta,2.0));
-                            //cout<<"sigma values are "<<sigma<<endl;
+                            //std::cout<<"sigma values are "<<sigma<<std::endl;
                           }
 
                         mode++;
@@ -1075,7 +1080,7 @@ double eles_quads::exponential_filter(int in_mode, int in_basis_order)
           }
         else
           {
-            cout << "ERROR: Invalid mode when evaluating exponential filter ...." << endl;
+            std::cout << "ERROR: Invalid mode when evaluating exponential filter ...." << std::endl;
           }
 
         return sigma;

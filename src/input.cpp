@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file input.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,6 +23,11 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../include/input.h"
+#include "../include/array.h"
+#include "../include/funcs.h"
+#include "../include/global.h"
+
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -34,12 +39,7 @@
 #include <vector>
 #include <map>
 
-#include "../include/input.h"
-#include "../include/array.h"
-#include "../include/funcs.h"
-#include "../include/global.h"
-
-using namespace std;
+//using namespace std;
 
 // #### constructors ####
 
@@ -157,10 +157,10 @@ void input::read_input_file(string fileName, int rank)
   opts.getScalarValue("adv_type",adv_type);
   opts.getScalarValue("dt_type",dt_type);
   if (dt_type == 2 && rank == 0) {
-    cout << "!!!!!!" << endl;
-    cout << "  Note: Local timestepping is still in an experimental phase,";
-    cout << "  especially for viscous simulations." << endl;
-    cout << "!!!!!!" << endl;
+    std::cout << "!!!!!!" << std::endl;
+    std::cout << "  Note: Local timestepping is still in an experimental phase,";
+    std::cout << "  especially for viscous simulations." << std::endl;
+    std::cout << "!!!!!!" << std::endl;
   }
 
   if (dt_type == 0) {
@@ -202,7 +202,7 @@ void input::read_input_file(string fileName, int rank)
     //        bound_vel_simple(i).setup(9);
     //        for (int j=0; j<9; j++) {
     //          in_run_input_file >> bound_vel_simple(i)(j);
-    //          //cout << bound_vel_simple(i)(j) << " ";
+    //          //std::cout << bound_vel_simple(i)(j) << " ";
     //        }
     //      }
     opts.getScalarValue("n_deform_iters",n_deform_iters);
@@ -382,7 +382,7 @@ void input::setup_params(int rank)
   
   
   if (rank==0)
-    cout << endl << "---------------------- Non-dimensionalization ---------------------" << endl;
+    std::cout << std::endl << "---------------------- Non-dimensionalization ---------------------" << std::endl;
   
   
   if(viscous) {
@@ -412,7 +412,7 @@ void input::setup_params(int rank)
       v_free_stream   = uvw_ref*ny_free_stream;
       w_free_stream   = uvw_ref*nz_free_stream;
       
-      // Set either a fixed value for the viscosity or a value from Sutherland's law
+      // Set either a std::fixed value for the viscosity or a value from Sutherland's law
       
       if(fix_vis)
       {
@@ -502,13 +502,13 @@ void input::setup_params(int rank)
       // Master node outputs information about the I.C.s to the console
       if (rank==0)
       {
-        cout << "uvw_ref: " << uvw_ref << endl;
-        cout << "rho_free_stream: " << rho_free_stream << endl;
-        cout << "rho_c_ic=" << rho_c_ic << endl;
-        cout << "u_c_ic=" << u_c_ic << endl;
-        cout << "v_c_ic=" << v_c_ic << endl;
-        cout << "w_c_ic=" << w_c_ic << endl;
-        cout << "mu_c_ic=" << mu_c_ic << endl;
+        std::cout << "uvw_ref: " << uvw_ref << std::endl;
+        std::cout << "rho_free_stream: " << rho_free_stream << std::endl;
+        std::cout << "rho_c_ic=" << rho_c_ic << std::endl;
+        std::cout << "u_c_ic=" << u_c_ic << std::endl;
+        std::cout << "v_c_ic=" << v_c_ic << std::endl;
+        std::cout << "w_c_ic=" << w_c_ic << std::endl;
+        std::cout << "mu_c_ic=" << mu_c_ic << std::endl;
       }
     }
   }
@@ -536,7 +536,7 @@ void fileReader::setFile(string fileName)
 
 void fileReader::openFile(void)
 {
-  optFile.open(fileName.c_str(), ifstream::in);
+  optFile.open(fileName.c_str(), std::ifstream::in);
 }
 
 void fileReader::closeFile()
@@ -564,14 +564,14 @@ void fileReader::getScalarValue(string optName, T &opt, T defaultVal)
   // Search for the given option string
   while (getline(optFile,str)) {
     // Remove any leading whitespace & see if first word is the input option
-    stringstream ss;
+    std::stringstream ss;
     ss.str(str);
     ss >> optKey;
     if (optKey.compare(optName)==0) {
       if (!(ss >> opt)) {
         // This could happen if, for example, trying to assign a string to a double
-        cout << "WARNING: Unable to assign value to option " << optName << endl;
-        cout << "Using default value of " << defaultVal << " instead." << endl;
+        std::cout << "WARNING: Unable to assign value to option " << optName << std::endl;
+        std::cout << "Using default value of " << defaultVal << " instead." << std::endl;
         opt = defaultVal;
       }
 
@@ -604,14 +604,14 @@ void fileReader::getScalarValue(string optName, T &opt)
   // Search for the given option string
   while (getline(optFile,str)) {
     // Remove any leading whitespace & see if first word is the input option
-    stringstream ss;
+    std::stringstream ss;
     ss.str(str);
     ss >> optKey;
 
     if (optKey.compare(optName)==0) {
       if (!(ss >> opt)) {
         // This could happen if, for example, trying to assign a string to a double
-        cerr << "WARNING: Unable to assign value to option " << optName << endl;
+        std::cerr << "WARNING: Unable to assign value to option " << optName << std::endl;
         string errMsg = "Required option not set: " + optName;
         FatalError(errMsg.c_str())
       }
@@ -648,14 +648,14 @@ void fileReader::getMap(string optName, map<T,U> &opt) {
   // Search for the given option string
   while (getline(optFile,str)) {
     // Remove any leading whitespace & see if first word is the input option
-    stringstream ss;
+    std::stringstream ss;
     ss.str(str);
     ss >> optKey;
     if (optKey.compare(optName)==0) {
       found = true;
       if (!(ss >> tmpT >> tmpU)) {
         // This could happen if, for example, trying to assign a string to a double
-        cerr << "WARNING: Unable to assign value to option " << optName << endl;
+        std::cerr << "WARNING: Unable to assign value to option " << optName << std::endl;
         string errMsg = "Required option not set: " + optName;
         FatalError(errMsg.c_str())
       }
@@ -694,14 +694,14 @@ void fileReader::getVectorValue(string optName, vector<T> &opt)
   // Search for the given option string
   while (getline(optFile,str)) {
     // Remove any leading whitespace & see if first word is the input option
-    stringstream ss;
+    std::stringstream ss;
     ss.str(str);
     ss >> optKey;
     if (optKey.compare(optName)==0) {
       int nVals;
       if (!(ss >> nVals)) {
         // This could happen if, for example, trying to assign a string to a double
-        cerr << "WARNING: Unable to read number of entries for vector option " << optName << endl;
+        std::cerr << "WARNING: Unable to read number of entries for vector option " << optName << std::endl;
         string errMsg = "Required option not set: " + optName;
         FatalError(errMsg.c_str());
       }
@@ -709,7 +709,7 @@ void fileReader::getVectorValue(string optName, vector<T> &opt)
       opt.resize(nVals);
       for (int i=0; i<nVals; i++) {
         if (!ss >> opt[i]) {
-          cerr << "WARNING: Unable to assign all values to vector option " << optName << endl;
+          std::cerr << "WARNING: Unable to assign all values to vector option " << optName << std::endl;
           string errMsg = "Required option not set: " + optName;
           FatalError(errMsg.c_str())
         }
@@ -745,14 +745,14 @@ void fileReader::getVectorValue(string optName, array<T> &opt)
   // Search for the given option string
   while (getline(optFile,str)) {
     // Remove any leading whitespace & see if first word is the input option
-    stringstream ss;
+    std::stringstream ss;
     ss.str(str);
     ss >> optKey;
     if (optKey.compare(optName)==0) {
       int nVals;
       if (!(ss >> nVals)) {
         // This could happen if, for example, trying to assign a string to a double
-        cerr << "WARNING: Unable to read number of entries for vector option " << optName << endl;
+        std::cerr << "WARNING: Unable to read number of entries for vector option " << optName << std::endl;
         string errMsg = "Required option not set: " + optName;
         FatalError(errMsg.c_str());
       }
@@ -760,7 +760,7 @@ void fileReader::getVectorValue(string optName, array<T> &opt)
       opt.setup(nVals);
       for (int i=0; i<nVals; i++) {
         if (!(ss >> opt(i))) {
-          cerr << "WARNING: Unable to assign all values to vector option " << optName << endl;
+          std::cerr << "WARNING: Unable to assign all values to vector option " << optName << std::endl;
           string errMsg = "Required option not set: " + optName;
           FatalError(errMsg.c_str());
         }
@@ -796,15 +796,15 @@ void fileReader::getVectorValueOptional(string optName, array<T> &opt)
   // Search for the given option string
   while (getline(optFile,str)) {
     // Remove any leading whitespace & see if first word is the input option
-    stringstream ss;
+    std::stringstream ss;
     ss.str(str);
     ss >> optKey;
     if (optKey.compare(optName)==0) {
       int nVals;
       if (!(ss >> nVals)) {
         // This could happen if, for example, trying to assign a string to a double
-        cerr << "WARNING: Unable to read number of entries for vector option " << optName << endl;
-        cerr << "Option not set: " << optName << endl;
+        std::cerr << "WARNING: Unable to read number of entries for vector option " << optName << std::endl;
+        std::cerr << "Option not set: " << optName << std::endl;
         opt.setup(0);
         return;
       }
@@ -812,8 +812,8 @@ void fileReader::getVectorValueOptional(string optName, array<T> &opt)
       opt.setup(nVals);
       for (int i=0; i<nVals; i++) {
         if (!(ss >> opt(i))) {
-          cerr << "WARNING: Unable to assign all values to vector option " << optName << endl;
-          cerr << "Option not set: " << optName << endl;
+          std::cerr << "WARNING: Unable to assign all values to vector option " << optName << std::endl;
+          std::cerr << "Option not set: " << optName << std::endl;
           opt.setup(0);
           return;
         }

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file cubature_tri.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -31,7 +31,7 @@
 #include "../include/global.h"
 #include "../include/cubature_tri.h"
 
-using namespace std;
+//using namespace std;
 
 // #### constructors ####
 
@@ -49,12 +49,12 @@ cubature_tri::cubature_tri()
 
 cubature_tri::cubature_tri(int in_order) // set by order
 {
-  ifstream datfile;
+  std::ifstream datfile;
   char buf[BUFSIZ]={""};
   char section_TXT[100], param_TXT[100];
   char* f;
   string filename, param_name, param, ord;
-  istringstream strbuf;
+  std::istringstream strbuf;
   int order_file;
   
   order=in_order;
@@ -118,7 +118,7 @@ cubature_tri::cubature_tri(int in_order) // set by order
     filename = HIFILES_DIR;
     filename += "/data/cubature_tri.dat";
     f = (char*)filename.c_str();
-    datfile.open(f, ifstream::in);
+    datfile.open(f, std::ifstream::in);
     if (!datfile) FatalError("Unable to open cubature file");
     
     // read data from file to arrays
@@ -131,7 +131,7 @@ cubature_tri::cubature_tri(int in_order) // set by order
       {
         // get no. of pts
         ord = param_name.substr(6);
-        stringstream str(ord);
+        std::stringstream str(ord);
         str >> order_file;
         
         // if pts matches order, read locs and weights
@@ -201,6 +201,7 @@ cubature_tri& cubature_tri::operator=(const cubature_tri& in_cubature_tri)
       n_pts=in_cubature_tri.n_pts;
       locs=in_cubature_tri.locs;
       weights=in_cubature_tri.weights;
+      return (*this);
     }
 }
 

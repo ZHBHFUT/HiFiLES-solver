@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file global.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -25,9 +25,10 @@
 
 #include "../include/global.h"
 #include "../include/array.h"
+
 #include <math.h>
 
-using namespace std;
+//using namespace std;
 
 input run_input;
 const double pi=4*atan(1);

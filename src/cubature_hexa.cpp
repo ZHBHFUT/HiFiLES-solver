@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file cubature_hexa.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -31,7 +31,7 @@
 #include "../include/global.h"
 #include "../include/cubature_hexa.h"
 
-using namespace std;
+//using namespace std;
 
 // #### constructors ####
 
@@ -49,12 +49,12 @@ cubature_hexa::cubature_hexa()
 
 cubature_hexa::cubature_hexa(int in_rule) // set by rule
 {	
-  ifstream datfile;
+  std::ifstream datfile;
   char buf[BUFSIZ]={""};
   char section_TXT[100], param_TXT[100];
   char* f;
   string filename, param_name, param, ord;
-  istringstream strbuf;
+  std::istringstream strbuf;
   int rule_file;
 
   rule=in_rule;
@@ -70,7 +70,7 @@ cubature_hexa::cubature_hexa(int in_rule) // set by rule
     filename = HIFILES_DIR;
     filename += "/data/cubature_hexa.dat";
     f = (char*)filename.c_str();
-    datfile.open(f, ifstream::in);
+    datfile.open(f, std::ifstream::in);
     if (!datfile) FatalError("Unable to open cubature file");
 
     // read data from file to arrays
@@ -83,7 +83,7 @@ cubature_hexa::cubature_hexa(int in_rule) // set by rule
       {
         // get no. of pts
         ord = param_name.substr(5);
-        stringstream str(ord);
+        std::stringstream str(ord);
         str >> rule_file;
         
         // if pts matches order, read locs and weights
@@ -165,6 +165,7 @@ cubature_hexa& cubature_hexa::operator=(const cubature_hexa& in_cubature)
       n_pts=in_cubature.n_pts;
       locs=in_cubature.locs;
       weights=in_cubature.weights;
+      return (*this);
     }
 }
 

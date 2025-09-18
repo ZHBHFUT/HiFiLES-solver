@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file flux.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,13 +23,13 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
-
+#include "../include/flux.h"
 #include "../include/global.h"
 #include "../include/array.h"
-#include "../include/flux.h"
 
-using namespace std;
+#include <cmath>
+
+//using namespace std;
 
 // calculate inviscid flux in 2D
 

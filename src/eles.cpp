@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file eles.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,9 +23,13 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <iomanip>
-#include <cmath>
+
+#include "../include/global.h"
+#include "../include/array.h"
+#include "../include/flux.h"
+#include "../include/source.h"
+#include "../include/eles.h"
+#include "../include/funcs.h"
 
 #if defined _ACCELERATE_BLAS
 #include <Accelerate/Accelerate.h>
@@ -43,6 +47,10 @@ extern "C"
 }
 #endif
 
+#if defined _OPEN_BLAS
+#include "openblas/cblas.h"
+#endif
+
 #ifdef _MPI
 #include "mpi.h"
 #include "metis.h"
@@ -56,14 +64,12 @@ extern "C"
 #include "../include/cuda_kernels.h"
 #endif
 
-#include "../include/global.h"
-#include "../include/array.h"
-#include "../include/flux.h"
-#include "../include/source.h"
-#include "../include/eles.h"
-#include "../include/funcs.h"
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+#include <string>
 
-using namespace std;
+//using namespace std;
 
 // #### constructors ####
 
@@ -157,7 +163,7 @@ void eles::setup(int in_n_eles, int in_max_n_spts_per_ele)
     }
     else
     {
-      cout << "ERROR: Type of time integration scheme not recongized ... " << endl;
+      std::cout << "ERROR: Type of time integration scheme not recongized ... " << std::endl;
     }
 
     // Allocate storage for solution
@@ -477,7 +483,7 @@ void eles::set_ics(double& time)
         }
         else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
       }
       else if(run_input.ic_form==1)
@@ -510,7 +516,7 @@ void eles::set_ics(double& time)
         }
         else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
         
       }
@@ -568,7 +574,7 @@ void eles::set_ics(double& time)
       }
       else
       {
-        cout << "ERROR: Invalid form of initial condition ... (File: " << __FILE__ << ", Line: " << __LINE__ << ")" << endl;
+        std::cout << "ERROR: Invalid form of initial condition ... (File: " << __FILE__ << ", Line: " << __LINE__ << ")" << std::endl;
         exit (1);
       }
       
@@ -620,7 +626,7 @@ void eles::set_ics(double& time)
 // set initial conditions
 
 
-void eles::read_restart_data(ifstream& restart_file)
+void eles::read_restart_data(std::ifstream& restart_file)
 {
   
   if (n_eles==0) return;
@@ -635,25 +641,25 @@ void eles::read_restart_data(ifstream& restart_file)
   
   // Move cursor to correct element type
   while(1) {
-    getline(restart_file,str);
+    std::getline(restart_file,str);
     if (str==ele_name) break;
     if (restart_file.eof()) return; // Restart file doesn't contain my elements
   }
   
   // Move cursor to n_eles
   while(1) {
-    getline(restart_file,str);
+    std::getline(restart_file,str);
     if (str=="n_eles") break;
   }
   
   // Read number of elements to read
   restart_file >> num_eles_to_read;
-  getline(restart_file,str);
+  std::getline(restart_file,str);
   
   //Skip ele2global_ele lines
-  getline(restart_file,str);
-  getline(restart_file,str);
-  getline(restart_file,str);
+  std::getline(restart_file,str);
+  std::getline(restart_file,str);
+  std::getline(restart_file,str);
   
   int ele,index;
   array<double> disu_upts_rest;
@@ -687,9 +693,9 @@ void eles::read_restart_data(ifstream& restart_file)
     else // Skip the data (doesn't belong to current processor)
     {
       // Skip rest of ele line
-      getline(restart_file,str);
+      std::getline(restart_file,str);
       for (int j=0;j<n_upts_per_ele_rest;j++)
-        getline(restart_file,str);
+        std::getline(restart_file,str);
     }
   }
   
@@ -715,46 +721,46 @@ void eles::read_restart_data(ifstream& restart_file)
 }
 
 
-void eles::write_restart_data(ofstream& restart_file)
+void eles::write_restart_data(std::ofstream& restart_file)
 {
-  restart_file << "n_eles" << endl;
-  restart_file << n_eles << endl;
-  restart_file << "ele2global_ele array" << endl;
+  restart_file << "n_eles" << std::endl;
+  restart_file << n_eles << std::endl;
+  restart_file << "ele2global_ele array" << std::endl;
   for (int i=0;i<n_eles;i++)
     restart_file << ele2global_ele(i) << " ";
-  restart_file << endl;
+  restart_file << std::endl;
   
-  restart_file << "data" << endl;
+  restart_file << "data" << std::endl;
   
   for (int i=0;i<n_eles;i++)
   {
-    restart_file << ele2global_ele(i) << endl;
+    restart_file << ele2global_ele(i) << std::endl;
     for (int j=0;j<n_upts_per_ele;j++)
     {
       for (int k=0;k<n_fields;k++)
       {
         restart_file << disu_upts(0)(j,i,k) << " ";
       }
-      restart_file << endl;
+      restart_file << std::endl;
     }
   }
-  restart_file << endl;
+  restart_file << std::endl;
 }
 
-void eles::write_restart_mesh(ofstream& restart_file)
+void eles::write_restart_mesh(std::ofstream& restart_file)
 {
-  restart_file << "n_eles" << endl;
-  restart_file << n_eles << endl;
-  restart_file << "ele2global_ele array" << endl;
+  restart_file << "n_eles" << std::endl;
+  restart_file << n_eles << std::endl;
+  restart_file << "ele2global_ele array" << std::endl;
   for (int i=0;i<n_eles;i++)
     restart_file << ele2global_ele(i) << " ";
-  restart_file << endl;
+  restart_file << std::endl;
 
-  restart_file << "data" << endl;
+  restart_file << "data" << std::endl;
 
   for (int i=0;i<n_eles;i++)
   {
-    restart_file << ele2global_ele(i) << endl;
+    restart_file << ele2global_ele(i) << std::endl;
     for (int j=0;j<n_upts_per_ele;j++)
     {
       for (int k=0;k<n_dims;k++)
@@ -764,10 +770,10 @@ void eles::write_restart_mesh(ofstream& restart_file)
         else
           restart_file << pos_upts(j,i,k) << " ";
       }
-      restart_file << endl;
+      restart_file << std::endl;
     }
   }
-  restart_file << endl;
+  restart_file << std::endl;
 }
 
 // move all to from cpu to gpu
@@ -1190,7 +1196,7 @@ void eles::AdvanceSolution(int in_step, int adv_type) {
     /*! Time integration not implemented. */
     
     else {
-      cout << "ERROR: Time integration type not recognised ... " << endl;
+      std::cout << "ERROR: Time integration type not recognised ... " << std::endl;
     }
     
   }
@@ -1303,7 +1309,7 @@ void eles::extrapolate_solution(int in_disu_upts_from)
       
 #endif
     }
-    else { cout << "ERROR: Unknown storage for opp_0 ... " << endl; }
+    else { std::cout << "ERROR: Unknown storage for opp_0 ... " << std::endl; }
     
 #endif
     
@@ -1318,7 +1324,7 @@ void eles::extrapolate_solution(int in_disu_upts_from)
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_0 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_0 ... " << std::endl;
     }
 #endif
     
@@ -1448,17 +1454,17 @@ void eles::extrapolate_totalFlux()
     {
 #if defined _MKL_BLAS
       
-      mkl_dcsrmm(&transa,&n_fpts_per_ele,&n_fields_mul_n_eles,&n_upts_per_ele,&one,matdescra,opp_1_data(0).get_ptr_cpu(),opp_1_cols(0).get_ptr_cpu(),opp_1_b(0).get_ptr_cpu(),opp_1_e(0).get_ptr_cpu(),tdisf_upts.get_ptr_cpu(0,0,0,0),&n_upts_per_ele,&zero,norm_tdisf_fpts.get_ptr_cpu,&n_fpts_per_ele);
+        mkl_dcsrmm(&transa, &n_fpts_per_ele, &n_fields_mul_n_eles, &n_upts_per_ele, &one, matdescra, opp_1_data(0).get_ptr_cpu(), opp_1_cols(0).get_ptr_cpu(), opp_1_b(0).get_ptr_cpu(), opp_1_e(0).get_ptr_cpu(), tdisf_upts.get_ptr_cpu(0, 0, 0, 0), &n_upts_per_ele, &zero, norm_tdisf_fpts.get_ptr_cpu(), &n_fpts_per_ele);
       
       for (int i=1;i<n_dims;i++) {
-        mkl_dcsrmm(&transa,&n_fpts_per_ele,&n_fields_mul_n_eles,&n_upts_per_ele,&one,matdescra,opp_1_data(i).get_ptr_cpu(),opp_1_cols(i).get_ptr_cpu(),opp_1_b(i).get_ptr_cpu(),opp_1_e(i).get_ptr_cpu(),tdisf_upts.get_ptr_cpu(0,0,0,i),&n_upts_per_ele,&one,norm_tdisf_fpts.get_ptr_cpu(),&n_fpts_per_ele);
+          mkl_dcsrmm(&transa, &n_fpts_per_ele, &n_fields_mul_n_eles, &n_upts_per_ele, &one, matdescra, opp_1_data(i).get_ptr_cpu(), opp_1_cols(i).get_ptr_cpu(), opp_1_b(i).get_ptr_cpu(), opp_1_e(i).get_ptr_cpu(), tdisf_upts.get_ptr_cpu(0, 0, 0, i), &n_upts_per_ele, &one, norm_tdisf_fpts.get_ptr_cpu(), &n_fpts_per_ele);
       }
       
 #endif
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_1 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_1 ... " << std::endl;
     }
     
 #endif
@@ -1490,16 +1496,16 @@ void eles::extrapolate_totalFlux()
    tdisinvf_upts.cp_gpu_cpu();
    #endif
    
-   cout << "Before" << endl;
+   std::cout << "Before" << std::endl;
    for (int i=0;i<n_fpts_per_ele;i++)
    for (int j=0;j<n_eles;j++)
    for (int k=0;k<n_fields;k++)
    for (int m=0;m<n_dims;m++)
-   cout << setprecision(10)  << i << " " << j<< " " << k << " " << tdisinvf_upts(i,j,k,m) << endl;
+   std::cout << std::setprecision(10)  << i << " " << j<< " " << k << " " << tdisinvf_upts(i,j,k,m) << std::endl;
    */
   
   /*
-   cout << "After,ele_type =" << ele_type << endl;
+   std::cout << "After,ele_type =" << ele_type << std::endl;
    #ifdef _GPU
    norm_tdisinvf_fpts.cp_gpu_cpu();
    #endif
@@ -1507,7 +1513,7 @@ void eles::extrapolate_totalFlux()
    for (int i=0;i<n_fpts_per_ele;i++)
    for (int j=0;j<n_eles;j++)
    for (int k=0;k<n_fields;k++)
-   cout << setprecision(10)  << i << " " << j<< " " << k << " " << norm_tdisinvf_fpts(i,j,k) << endl;
+   std::cout << std::setprecision(10)  << i << " " << j<< " " << k << " " << norm_tdisinvf_fpts(i,j,k) << std::endl;
    */
 }
 
@@ -1553,7 +1559,7 @@ void eles::calculate_divergence(int in_div_tconf_upts_to)
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_2 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_2 ... " << std::endl;
     }
     
 #endif
@@ -1584,7 +1590,7 @@ void eles::calculate_divergence(int in_div_tconf_upts_to)
    for (int j=0;j<n_eles;j++)
    for (int i=0;i<n_upts_per_ele;i++)
    //for (int k=0;k<n_fields;k++)
-   cout << scientific << setw(16) << setprecision(12) << div_tconf_upts(0)(i,j,0) << endl;
+   std::cout << scientific << std::setw(16) << std::setprecision(12) << div_tconf_upts(0)(i,j,0) << std::endl;
    */
 }
 
@@ -1628,7 +1634,7 @@ void eles::calculate_corrected_divergence(int in_div_tconf_upts_to)
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_3 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_3 ... " << std::endl;
     }
     
     for (int i=0;i<n_upts_per_ele;i++)
@@ -1653,7 +1659,7 @@ void eles::calculate_corrected_divergence(int in_div_tconf_upts_to)
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_3 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_3 ... " << std::endl;
     }
 #endif
 
@@ -1724,7 +1730,7 @@ void eles::calculate_gradient(int in_disu_upts_from)
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_4 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_4 ... " << std::endl;
     }
     
 #endif
@@ -1749,7 +1755,7 @@ void eles::calculate_gradient(int in_disu_upts_from)
   }
 
   /*
-   cout << "OUTPUT" << endl;
+   std::cout << "OUTPUT" << std::endl;
    #ifdef _GPU
    grad_disu_upts.cp_gpu_cpu();
    #endif
@@ -1760,7 +1766,7 @@ void eles::calculate_gradient(int in_disu_upts_from)
    for (int m=0;m<n_dims;m++)
    {
    if (ele2global_ele(j)==53)
-   cout << setprecision(10)  << i << " " << ele2global_ele(j) << " " << k << " " << m << " " << grad_disu_upts(i,j,k,m) << endl;
+   std::cout << std::setprecision(10)  << i << " " << ele2global_ele(j) << " " << k << " " << m << " " << grad_disu_upts(i,j,k,m) << std::endl;
    }
    */
 }
@@ -1809,7 +1815,7 @@ void eles::correct_gradient(void)
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_5 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_5 ... " << std::endl;
     }
     
     // Transform to physical space
@@ -1943,13 +1949,13 @@ void eles::correct_gradient(void)
    {
    if (ele2global_ele(j)==53)
    {
-   cout << setprecision(10)  << i << " " << ele2global_ele(j) << " " << k << " " << " " << delta_disu_fpts(i,j,k) << endl;
+   std::cout << std::setprecision(10)  << i << " " << ele2global_ele(j) << " " << k << " " << " " << delta_disu_fpts(i,j,k) << std::endl;
    }
    }
    */
   
   /*
-   cout << "OUTPUT" << endl;
+   std::cout << "OUTPUT" << std::endl;
    #ifdef _GPU
    grad_disu_upts.cp_gpu_cpu();
    #endif
@@ -1961,7 +1967,7 @@ void eles::correct_gradient(void)
    {
    if (ele2global_ele(j)==53)
    {
-   cout << setprecision(10)  << i << " " << ele2global_ele(j) << " " << k << " " << m << " " << grad_disu_upts(i,j,k,m) << endl;
+   std::cout << std::setprecision(10)  << i << " " << ele2global_ele(j) << " " << k << " " << m << " " << grad_disu_upts(i,j,k,m) << std::endl;
    }
    }
    */
@@ -2011,7 +2017,7 @@ void eles::extrapolate_corrected_gradient(void)
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_6 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_6 ... " << std::endl;
     }
     
 #endif
@@ -2038,7 +2044,7 @@ void eles::extrapolate_corrected_gradient(void)
   }
   
   /*
-   cout << "OUTPUT" << endl;
+   std::cout << "OUTPUT" << std::endl;
    #ifdef _GPU
    grad_disu_fpts.cp_gpu_cpu();
    #endif
@@ -2047,7 +2053,7 @@ void eles::extrapolate_corrected_gradient(void)
    for (int j=0;j<n_eles;j++)
    for (int k=0;k<n_fields;k++)
    for (int m=0;m<n_dims;m++)
-   cout << setprecision(10)  << i << " " << j<< " " << k << " " << m << " " << grad_disu_fpts(i,j,k,m) << endl;
+   std::cout << std::setprecision(10)  << i << " " << j<< " " << k << " " << m << " " << grad_disu_fpts(i,j,k,m) << std::endl;
    */
 }
 
@@ -2363,7 +2369,7 @@ void eles::evaluate_viscFlux(int in_disu_upts_from)
         }
         else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
         
         // If LES or wall model, calculate SGS viscous flux
@@ -2519,7 +2525,7 @@ void eles::calc_sgsf_upts(array<double>& temp_u, array<double>& temp_grad_u, dou
     
     if(y < run_input.wall_layer_t) wall = 1;
     //if(yplus < 100.0) wall = 1;
-    //cout << "tw, y, y+ " << tw(0) << ", " << y << ", " << yplus << endl;
+    //std::cout << "tw, y, y+ " << tw(0) << ", " << y << ", " << yplus << std::endl;
   }
   
   // calculate SGS flux from a wall model
@@ -2808,7 +2814,7 @@ void eles::calc_src_upts_SA(int in_disu_upts_from)
         else if(n_dims==3)
           calc_source_SA_3d(temp_u, temp_grad_u, wall_distance_mag(j,i), src_upts(j,i,n_fields-1));
         else
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
       }
     }
 
@@ -3341,7 +3347,7 @@ void eles::evaluate_sgsFlux(void)
       
 #endif
     }
-    else { cout << "ERROR: Unknown storage for opp_0 ... " << endl; }
+    else { std::cout << "ERROR: Unknown storage for opp_0 ... " << std::endl; }
     
 #endif
     
@@ -3361,7 +3367,7 @@ void eles::evaluate_sgsFlux(void)
     }
     else
     {
-      cout << "ERROR: Unknown storage for opp_0 ... " << endl;
+      std::cout << "ERROR: Unknown storage for opp_0 ... " << std::endl;
     }
 #endif
   }
@@ -3642,10 +3648,10 @@ void eles::set_opp_0(int in_sparse)
   opp_0.cp_cpu_gpu();
 #endif
   
-  //cout << "opp_0" << endl;
-  //cout << "ele_type=" << ele_type << endl;
+  //std::cout << "opp_0" << std::endl;
+  //std::cout << "ele_type=" << ele_type << std::endl;
   //opp_0.print();
-  //cout << endl;
+  //std::cout << std::endl;
   
   if(in_sparse==0)
   {
@@ -3668,7 +3674,7 @@ void eles::set_opp_0(int in_sparse)
   }
   else
   {
-    cout << "ERROR: Invalid sparse matrix form ... " << endl;
+    std::cout << "ERROR: Invalid sparse matrix form ... " << std::endl;
   }
   
   
@@ -3700,10 +3706,10 @@ void eles::set_opp_1(int in_sparse)
         opp_1(i)(k,j)=eval_nodal_basis(j,loc)*tnorm_fpts(i,k);
       }
     }
-    //cout << "opp_1,i =" << i << endl;
-    //cout << "ele_type=" << ele_type << endl;
+    //std::cout << "opp_1,i =" << i << std::endl;
+    //std::cout << "ele_type=" << ele_type << std::endl;
     //opp_1(i).print();
-    //cout << endl;
+    //std::cout << std::endl;
   }
   
 #ifdef _GPU
@@ -3740,7 +3746,7 @@ void eles::set_opp_1(int in_sparse)
   }
   else
   {
-    cout << "ERROR: Invalid sparse matrix form ... " << endl;
+    std::cout << "ERROR: Invalid sparse matrix form ... " << std::endl;
   }
 }
 
@@ -3772,12 +3778,12 @@ void eles::set_opp_2(int in_sparse)
       }
     }
     
-    //cout << "opp_2,i =" << i << endl;
-    //cout << "ele_type=" << ele_type << endl;
+    //std::cout << "opp_2,i =" << i << std::endl;
+    //std::cout << "ele_type=" << ele_type << std::endl;
     //opp_2(i).print();
-    //cout << endl;
+    //std::cout << std::endl;
     
-    //cout << "opp_2,i=" << i << endl;
+    //std::cout << "opp_2,i=" << i << std::endl;
     //opp_2(i).print();
     
   }
@@ -3787,7 +3793,7 @@ void eles::set_opp_2(int in_sparse)
     opp_2(i).cp_cpu_gpu();
 #endif
   
-  //cout << "opp 2" << endl;
+  //std::cout << "opp 2" << std::endl;
   //opp_2.print();
   
   if(in_sparse==0)
@@ -3817,7 +3823,7 @@ void eles::set_opp_2(int in_sparse)
   }
   else
   {
-    cout << "ERROR: Invalid sparse matrix form ... " << endl;
+    std::cout << "ERROR: Invalid sparse matrix form ... " << std::endl;
   }
 }
 
@@ -3829,10 +3835,10 @@ void eles::set_opp_3(int in_sparse)
   opp_3.setup(n_upts_per_ele,n_fpts_per_ele);
   (*this).fill_opp_3(opp_3);
   
-  //cout << "OPP_3" << endl;
-  //cout << "ele_type=" << ele_type << endl;
+  //std::cout << "OPP_3" << std::endl;
+  //std::cout << "ele_type=" << ele_type << std::endl;
   //opp_3.print();
-  //cout << endl;
+  //std::cout << std::endl;
   
 #ifdef _GPU
   opp_3.cp_cpu_gpu();
@@ -3858,7 +3864,7 @@ void eles::set_opp_3(int in_sparse)
   }
   else
   {
-    cout << "ERROR: Invalid sparse matrix form ... " << endl;
+    std::cout << "ERROR: Invalid sparse matrix form ... " << std::endl;
   }
 }
 
@@ -3923,7 +3929,7 @@ void eles::set_opp_4(int in_sparse)
   }
   else
   {
-    cout << "ERROR: Invalid sparse matrix form ... " << endl;
+    std::cout << "ERROR: Invalid sparse matrix form ... " << std::endl;
   }
 }
 
@@ -3963,7 +3969,7 @@ void eles::set_opp_5(int in_sparse)
     opp_5(i).cp_cpu_gpu();
 #endif
   
-  //cout << "opp_5" << endl;
+  //std::cout << "opp_5" << std::endl;
   //opp_5.print();
   
   if(in_sparse==0)
@@ -3993,7 +3999,7 @@ void eles::set_opp_5(int in_sparse)
   }
   else
   {
-    cout << "ERROR: Invalid sparse matrix form ... " << endl;
+    std::cout << "ERROR: Invalid sparse matrix form ... " << std::endl;
   }
 }
 
@@ -4019,7 +4025,7 @@ void eles::set_opp_6(int in_sparse)
     }
   }
   
-  //cout << "opp_6" << endl;
+  //std::cout << "opp_6" << std::endl;
   //opp_6.print();
   
 #ifdef _GPU
@@ -4047,7 +4053,7 @@ void eles::set_opp_6(int in_sparse)
   }
   else
   {
-    cout << "ERROR: Invalid sparse matrix form ... " << endl;
+    std::cout << "ERROR: Invalid sparse matrix form ... " << std::endl;
   }
 }
 
@@ -4197,7 +4203,7 @@ void eles::calc_disu_ppts(int in_ele, array<double>& out_disu_ppts)
         if (motion) {
           disu_upts_plot(j,i)=disu_upts(0)(j,in_ele,i)/J_dyn_upts(j,in_ele);
           //disu_upts_plot(j,i)=1/J_dyn_upts(j,in_ele);
-          //cout << in_ele << "," << j << "," << i << ": " << disu_upts(0)(j,in_ele,i) << ", " << J_dyn_upts(j,in_ele) << endl;
+          //std::cout << in_ele << "," << j << "," << i << ": " << disu_upts(0)(j,in_ele,i) << ", " << J_dyn_upts(j,in_ele) << std::endl;
         }else{
           disu_upts_plot(j,i)=disu_upts(0)(j,in_ele,i);
         }
@@ -4517,11 +4523,11 @@ void eles::calc_diagnostic_fields_ppts(int in_ele, array<double>& in_disu_ppts, 
       }
 
       else {
-        cout << "plot_quantity = " << run_input.diagnostic_fields(k) << ": " << flush;
+        std::cout << "plot_quantity = " << run_input.diagnostic_fields(k) << ": " << std::flush;
         FatalError("plot_quantity not recognized");
       }
       if (isnan(diagfield_upt)) {
-        cout << "In calculation of plot_quantitiy " << run_input.diagnostic_fields(k) << ": " << flush;
+        std::cout << "In calculation of plot_quantitiy " << run_input.diagnostic_fields(k) << ": " << std::flush;
         FatalError("NaN");
       }
       
@@ -4593,13 +4599,13 @@ void eles::set_transforms(void)
     pos_upts.setup(n_upts_per_ele,n_eles,n_dims);
     
     if (rank==0) {
-      cout << " at solution points" << endl;
+      std::cout << " at solution points" << std::endl;
     }
     
     for(i=0;i<n_eles;i++)
     {
       if ((i%(max(n_eles,10)/10))==0 && rank==0)
-        cout << fixed << setprecision(2) <<  (i*1.0/n_eles)*100 << "% " << flush;
+        std::cout << std::fixed << std::setprecision(2) <<  (i*1.0/n_eles)*100 << "% " << std::flush;
       
       for(j=0;j<n_upts_per_ele;j++)
       {
@@ -4674,7 +4680,7 @@ void eles::set_transforms(void)
         }
         else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
       }
     }
@@ -4700,12 +4706,12 @@ void eles::set_transforms(void)
     pos_fpts.setup(n_fpts_per_ele,n_eles,n_dims);
     
     if (rank==0)
-      cout << endl << " at flux points"  << endl;
+      std::cout << std::endl << " at flux points"  << std::endl;
     
     for(i=0;i<n_eles;i++)
     {
       if ((i%(max(n_eles,10)/10))==0 && rank==0)
-        cout << fixed << setprecision(2) <<  (i*1.0/n_eles)*100 << "% " << flush;
+        std::cout << std::fixed << std::setprecision(2) <<  (i*1.0/n_eles)*100 << "% " << std::flush;
       
       for(j=0;j<n_fpts_per_ele;j++)
       {
@@ -4819,7 +4825,7 @@ void eles::set_transforms(void)
         }
         else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
       }
     }
@@ -4842,7 +4848,7 @@ void eles::set_transforms(void)
     }
 #endif
     
-    if (rank==0) cout << endl;
+    if (rank==0) std::cout << std::endl;
   } // if n_eles!=0
 }
 
@@ -4884,12 +4890,12 @@ void eles::set_transforms_dynamic(void)
     double zr, zs, zt;
 
     if (rank==0 && first_time) {
-      cout << " Setting up dynamic->static transforms at solution points" << endl;
+      std::cout << " Setting up dynamic->static transforms at solution points" << std::endl;
     }
 
     for(i=0;i<n_eles;i++) {
       if ((i%(max(n_eles,10)/10))==0 && rank==0 && first_time)
-        cout << fixed << setprecision(2) <<  (i*1.0/n_eles)*100 << "% " << flush;
+        std::cout << std::fixed << std::setprecision(2) <<  (i*1.0/n_eles)*100 << "% " << std::flush;
 
       for(j=0;j<n_upts_per_ele;j++)
       {
@@ -4957,7 +4963,7 @@ void eles::set_transforms_dynamic(void)
         }
         else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
 
         // Have to use the GCL-corrected Jacobain everywhere
@@ -4967,11 +4973,11 @@ void eles::set_transforms_dynamic(void)
 
     // Compute metrics term at flux points
     if (rank==0 && first_time)
-      cout << endl << " at flux points"  << endl;
+      std::cout << std::endl << " at flux points"  << std::endl;
 
     for(i=0;i<n_eles;i++) {
       if ((i%(max(n_eles,10)/10))==0 && rank==0 && first_time)
-        cout << fixed << setprecision(2) <<  (i*1.0/n_eles)*100 << "% " << flush;
+        std::cout << std::fixed << std::setprecision(2) <<  (i*1.0/n_eles)*100 << "% " << std::flush;
 
       for(j=0;j<n_fpts_per_ele;j++)
       {
@@ -5085,11 +5091,11 @@ void eles::set_transforms_dynamic(void)
         }
         else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
       }
     }
-    if (rank==0 && first_time) cout << endl;
+    if (rank==0 && first_time) std::cout << std::endl;
 
     // To avoid re-setting up ALL transform arrays in the future (for dynamic grids)
     first_time = false;
@@ -5101,10 +5107,10 @@ void eles::set_transforms_dynamic(void)
   {
     if (first_time) cp_transforms_cpu_gpu();
 
-    if (rank == 0 && first_time) cout << "Setting dynamic transformations ... " << flush;
+    if (rank == 0 && first_time) std::cout << "Setting dynamic transformations ... " << std::flush;
     set_transforms_dynamic_fpts_kernel_wrapper(n_fpts_per_ele,n_eles,n_dims,max_n_spts_per_ele,n_spts_per_ele.get_ptr_gpu(),detjac_fpts.get_ptr_gpu(),J_dyn_fpts.get_ptr_gpu(),JGinv_fpts.get_ptr_gpu(),JGinv_dyn_fpts.get_ptr_gpu(),ndA_dyn_fpts.get_ptr_gpu(),norm_fpts.get_ptr_gpu(),norm_dyn_fpts.get_ptr_gpu(),d_nodal_s_basis_fpts.get_ptr_gpu(),shape_dyn.get_ptr_gpu());
     set_transforms_dynamic_upts_kernel_wrapper(n_upts_per_ele,n_eles,n_dims,max_n_spts_per_ele,n_spts_per_ele.get_ptr_gpu(),detjac_upts.get_ptr_gpu(),J_dyn_upts.get_ptr_gpu(),JGinv_upts.get_ptr_gpu(),JGinv_dyn_upts.get_ptr_gpu(),d_nodal_s_basis_upts.get_ptr_gpu(),shape_dyn.get_ptr_gpu());
-    if (rank == 0 && first_time) cout << "done." << endl;
+    if (rank == 0 && first_time) std::cout << "done." << std::endl;
   }
 
   first_time = false;
@@ -5597,8 +5603,8 @@ double* eles::get_delta_disu_fpts_ptr(int in_inter_local_fpt, int in_ele_local_i
   
   //if (ele2global_ele(in_ele)==53)
   //{
-  //  cout << "HERE" << endl;
-  //  cout << "local_face=" << in_ele_local_inter << endl;
+  //  std::cout << "HERE" << std::endl;
+  //  std::cout << "local_face=" << in_ele_local_inter << std::endl;
   //}
   
   for(i=0;i<in_ele_local_inter;i++)
@@ -6158,7 +6164,7 @@ array<double> eles::compute_error(int in_norm_type, double& time)
               value += opp_volume_cubpts(j,k)*grad_disu_upts(k,i,m,n);
             }
             grad_disu_cubpt(m,n) = value;
-            //cout << value << endl;
+            //std::cout << value << std::endl;
           }
         }
       }
@@ -6172,7 +6178,7 @@ array<double> eles::compute_error(int in_norm_type, double& time)
     }
   }
   
-  cout << "time   " << time << endl;
+  std::cout << "time   " << time << std::endl;
   
   return error_sum;
 }
@@ -6312,7 +6318,7 @@ void eles::evaluate_body_force(int in_file_num)
     array <double> disu_cubpt(4);
     array <double> integral(4);
     array <double> norm(n_dims), flow(n_dims), loc(n_dims), pos(n_dims);
-    ofstream write_mdot;
+    std::ofstream write_mdot;
     bool open_mdot;
 
     for (i=0;i<4;i++)
@@ -6449,24 +6455,24 @@ void eles::evaluate_body_force(int in_file_num)
     body_force(3) = 0.;
     body_force(4) = body_force(1)*ubulk; // energy forcing
 
-    if (rank == 0) cout << "iter, mdot0, mdot_old, mass_flux, body_force(1): " << in_file_num << ", " << setprecision(8) << mdot0 << ", " << mdot_old << ", " << mass_flux << ", " << body_force(1) << endl;
+    if (rank == 0) std::cout << "iter, mdot0, mdot_old, mass_flux, body_force(1): " << in_file_num << ", " << std::setprecision(8) << mdot0 << ", " << mdot_old << ", " << mass_flux << ", " << body_force(1) << std::endl;
 
     // write out mass flux to file
     if (rank == 0) {
       if (run_input.restart_flag==0 and in_file_num == 1) {
         // write file header
-        write_mdot.open("massflux.dat", ios::out);
-        write_mdot << "Iteration, massflux, Ubulk, bodyforce(x)" << endl;
+        write_mdot.open("massflux.dat", std::ios::out);
+        write_mdot << "Iteration, massflux, Ubulk, bodyforce(x)" << std::endl;
         write_mdot.close();
       }
       else {
         // append subsequent dqata
-        write_mdot.open("massflux.dat", ios::app);
+        write_mdot.open("massflux.dat", std::ios::app);
         write_mdot.precision(15);
         write_mdot << in_file_num;
         write_mdot << ", " << mass_flux;
         write_mdot << ", " << ubulk;
-        write_mdot << ", " << body_force(1) << endl;
+        write_mdot << ", " << body_force(1) << std::endl;
         write_mdot.close();
       }
     }
@@ -6728,7 +6734,7 @@ void eles::CalcTimeAverageQuantities(double& time)
   }
 }
 
-void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_force,  double& temp_cl, double& temp_cd, ofstream& coeff_file, bool write_forces)
+void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_force,  double& temp_cl, double& temp_cd, std::ofstream& coeff_file, bool write_forces)
 {
   
   array<double> u_l(n_fields),norm(n_dims);
@@ -6776,7 +6782,7 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
   factor = 1.0 / (0.5*run_input.rho_c_ic*(run_input.u_c_ic*run_input.u_c_ic+run_input.v_c_ic*run_input.v_c_ic+run_input.w_c_ic*run_input.w_c_ic));
 
   // Add a header to the force file
-  if (write_forces) { coeff_file << setw(18) << "x" << setw(18) << "Cp" << setw(18) << "Cf" << endl; }
+  if (write_forces) { coeff_file << std::setw(18) << "x" << std::setw(18) << "Cp" << std::setw(18) << "Cf" << std::endl; }
   
   // loop over the boundary elements
   for (int i=0;i<n_bdy_eles;i++) {
@@ -6881,7 +6887,7 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
                   }
                   
                   // write to file
-                  if (write_forces) { coeff_file << scientific << setw(18) << setprecision(12) << pos(0) << " " << setw(18) << setprecision(12) << cp;}
+                  if (write_forces) { coeff_file << std::scientific << std::setw(18) << std::setprecision(12) << pos(0) << " " << std::setw(18) << std::setprecision(12) << cp;}
 
                   if (viscous==1)
                     {
@@ -6937,7 +6943,7 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
                           // coefficient of friction
                           cf = tauw*factor;
                           
-                          if (write_forces) { coeff_file << " " << setw(18) <<setprecision(12) << cf; }
+                          if (write_forces) { coeff_file << " " << std::setw(18) <<std::setprecision(12) << cf; }
 
                           // viscous force
                           for (int m=0;m<n_dims;m++)
@@ -6973,7 +6979,7 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
                           // coefficient of friction
                           cf = tauw*factor;
                           
-                          if (write_forces) { coeff_file << " " << setw(18) <<setprecision(12) << cf; }
+                          if (write_forces) { coeff_file << " " << std::setw(18) <<std::setprecision(12) << cf; }
                           
                           // viscous force
                           for (int m=0;m<n_dims;m++)
@@ -6990,7 +6996,7 @@ void eles::compute_wall_forces( array<double>& inv_force, array<double>& vis_for
                         }
                     } // End of if viscous
 
-                  if (write_forces) { coeff_file << endl; }
+                  if (write_forces) { coeff_file << std::endl; }
                   
                   // Add force and coefficient contributions from current face
                   for (int m=0;m<n_dims;m++)

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file vector_structure.hpp
  * \brief Headers for the classes related to linear solvers (CG, FGMRES, etc)
  *        The subroutines and functions are in the <i>linear_solvers_structure.cpp</i> file.
@@ -29,18 +29,18 @@
 #ifdef MPI
 #include <mpi.h>
 #endif
-#include <climits>
-#include <limits>
+//#include <climits>
+#include <cstdlib>
 #include <cmath>
+#include <limits>
 #include <vector>
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <cstdlib>
 
-using namespace std;
+//using namespace std;
 
-const double eps = numeric_limits<double>::epsilon(); /*!< \brief machine epsilon */
+const double eps = std::numeric_limits<double>::epsilon(); /*!< \brief machine epsilon */
 
 /*!
  * \class CSysVector
@@ -57,12 +57,12 @@ class CSysVector {
   
 private:
   
-	unsigned long nElm; /*!< \brief total number of elements (or number elements on this processor) */
-	unsigned long nElmDomain; /*!< \brief total number of elements (or number elements on this processor without Ghost cells) */
+    unsigned long nElm; /*!< \brief total number of elements (or number elements on this processor) */
+    unsigned long nElmDomain; /*!< \brief total number of elements (or number elements on this processor without Ghost cells) */
   unsigned long nElmGlobal; /*!< \brief total number of elements over all processors */
-	unsigned short nVar; /*!< \brief number of elements in a block */
-	unsigned long nBlk; /*!< \brief number of blocks (or number of blocks on this processor) */
-	unsigned long nBlkDomain; /*!< \brief number of blocks (or number of blocks on this processor without Ghost cells) */
+    unsigned short nVar; /*!< \brief number of elements in a block */
+    unsigned long nBlk; /*!< \brief number of blocks (or number of blocks on this processor) */
+    unsigned long nBlkDomain; /*!< \brief number of blocks (or number of blocks on this processor without Ghost cells) */
   unsigned long myrank; /*!< \brief processor rank (only used for parallel runs) */
   double* vec_val; /*!< \brief storage for the element values */
   
@@ -95,9 +95,9 @@ public:
   CSysVector(const CSysVector & u);
   
   /*!
-	 * \brief Sets to zero all the entries of the vector.
-	 */
-	void SetValZero(void);
+     * \brief Sets to zero all the entries of the vector.
+     */
+    void SetValZero(void);
   
   /*!
    * \brief constructor from array
@@ -148,8 +148,8 @@ public:
    * \brief return the number of blocks (typically number of nodes locally)
    */
   unsigned long GetNBlk() const;
-	
-	/*!
+    
+    /*!
    * \brief return the number of blocks (typically number of nodes locally)
    */
   unsigned long GetNBlkDomain() const;
@@ -270,59 +270,59 @@ public:
   void CopyToArray(double* u_array);
   
   /*!
-	 * \brief Subtract val_residual to the residual.
-	 * \param[in] val_ipoint - index of the point where subtract the residual.
+     * \brief Subtract val_residual to the residual.
+     * \param[in] val_ipoint - index of the point where subtract the residual.
    * \param[in] val_residual - Value to subtract to the residual.
-	 */
+     */
   void SubtractBlock(unsigned long val_ipoint, double *val_residual);
   
   /*!
-	 * \brief Add val_residual to the residual.
-	 * \param[in] val_ipoint - index of the point where add the residual.
+     * \brief Add val_residual to the residual.
+     * \param[in] val_ipoint - index of the point where add the residual.
    * \param[in] val_residual - Value to add to the residual.
-	 */
+     */
   void AddBlock(unsigned long val_ipoint, double *val_residual);
   
   /*!
-	 * \brief Set val_residual to the residual.
-	 * \param[in] val_ipoint - index of the point where set the residual.
+     * \brief Set val_residual to the residual.
+     * \param[in] val_ipoint - index of the point where set the residual.
    * \param[in] val_var - inde of the residual to be set.
    * \param[in] val_residual - Value to set to the residual.
-	 */
+     */
   void SetBlock(unsigned long val_ipoint, unsigned short val_var, double val_residual);
   
   /*!
-	 * \brief Set val_residual to the residual.
-	 * \param[in] val_ipoint - index of the point where set the residual.
+     * \brief Set val_residual to the residual.
+     * \param[in] val_ipoint - index of the point where set the residual.
    * \param[in] val_residual - Value to set to the residual.
-	 */
+     */
   void SetBlock(unsigned long val_ipoint, double *val_residual);
   
   /*!
-	 * \brief Set the residual to zero.
-	 * \param[in] val_ipoint - index of the point where set the residual.
-	 */
+     * \brief Set the residual to zero.
+     * \param[in] val_ipoint - index of the point where set the residual.
+     */
   void SetBlock_Zero(unsigned long val_ipoint);
   
   /*!
-	 * \brief Set the velocity residual to zero.
-	 * \param[in] val_ipoint - index of the point where set the residual.
-	 */
+     * \brief Set the velocity residual to zero.
+     * \param[in] val_ipoint - index of the point where set the residual.
+     */
   void SetBlock_Zero(unsigned long val_ipoint, unsigned short val_var);
-	
+    
   /*!
-	 * \brief Get the value of the residual.
-	 * \param[in] val_ipoint - index of the point where set the residual.
+     * \brief Get the value of the residual.
+     * \param[in] val_ipoint - index of the point where set the residual.
    * \return Pointer to the residual.
-	 */
+     */
   double *GetBlock(unsigned long val_ipoint);
-	
+    
   /*!
-	 * \brief Get the value of the residual.
-	 * \param[in] val_ipoint - index of the point where set the residual.
+     * \brief Get the value of the residual.
+     * \param[in] val_ipoint - index of the point where set the residual.
    * \param[in] val_var - inde of the residual to be set.
    * \return Value of the residual.
-	 */
+     */
   double GetBlock(unsigned long val_ipoint, unsigned short val_var);
   
   

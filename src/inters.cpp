@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file inters.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,9 +23,6 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <cmath>
-
 #include "../include/global.h"
 #include "../include/array.h"
 #include "../include/inters.h"
@@ -43,7 +40,10 @@
 #include "mpi.h"
 #endif
 
-using namespace std;
+#include <cmath>
+#include <iostream>
+
+//using namespace std;
 
 // #### constructors ####
 
@@ -239,7 +239,7 @@ void inters::get_lut(int in_rot_tag)
         }
       else
         {
-          cout << "ERROR: Unknown rotation of triangular face..." << endl;
+          std::cout << "ERROR: Unknown rotation of triangular face..." << std::endl;
         }
     }
   else if(inters_type==2) // quad face
@@ -286,7 +286,7 @@ void inters::get_lut(int in_rot_tag)
         }
       else
         {
-          cout << "ERROR: Unknown rotation tag ... " << endl;
+          std::cout << "ERROR: Unknown rotation tag ... " << std::endl;
         }
     }
   else

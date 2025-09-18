@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file mesh.cpp
  * \brief  - Handle mesh motion using linear elasticity and other methods
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
@@ -27,16 +27,16 @@
 #include "../include/geometry.h"
 #include "../include/cuda_kernels.h"
 #include <string>
-using namespace std;
+//using namespace std;
 
 template <typename T>
 void displayMatrix(array<T> matrix) {
   int i,j;
   for (i=0; i<matrix.get_dim(0); i++) {
     for (j=0; j<matrix.get_dim(1); j++) {
-      cout << matrix(i,j) << " ";
+      std::cout << matrix(i,j) << " ";
     }
-    cout << endl;
+    std::cout << std::endl;
   }
 }
 
@@ -184,15 +184,15 @@ void mesh::deform(struct solution* FlowSol) {
 
   array<int> nodes; // NEW ADDITION 3/26/2014
 
-  /// cout << endl << ">>>>>>>>> Beginning Mesh Deformation >>>>>>>>>" << endl;
+  /// std::cout << std::endl << ">>>>>>>>> Beginning Mesh Deformation >>>>>>>>>" << std::endl;
   int pt_0,pt_1,pt_2,pt_3;
   bool check;
 
   min_vol = check_grid(FlowSol);
   set_min_length();
-  /* cout << "n_verts: " << n_verts << ", ";
-    cout << "n_dims: " << n_dims << ", ";
-    cout << "min_vol = " << min_vol << endl; */
+  /* std::cout << "n_verts: " << n_verts << ", ";
+    std::cout << "n_dims: " << n_dims << ", ";
+    std::cout << "min_vol = " << min_vol << std::endl; */
 
   // Setup stiffness matrices for each individual element,
   // combine all element-level matrices into global matrix
@@ -205,7 +205,7 @@ void mesh::deform(struct solution* FlowSol) {
     deformation can be divided into increments to help with stability. In
     particular, the linear elasticity equations hold only for small deformations. ---*/
   for (int iGridDef_Iter = 0; iGridDef_Iter < run_input.n_deform_iters; iGridDef_Iter++) {
-    //cout << ">>Iteration " << iGridDef_Iter+1 << " of " << run_input.n_deform_iters << endl;
+    //std::cout << ">>Iteration " << iGridDef_Iter+1 << " of " << run_input.n_deform_iters << std::endl;
     /*--- Initialize vector and sparse matrix ---*/
 
     LinSysSol.SetValZero();
@@ -303,9 +303,9 @@ void mesh::deform(struct solution* FlowSol) {
 
     bool mesh_monitor = false;
     if (FlowSol->rank == 0 && mesh_monitor) {
-      cout << "Non-linear iter.: " << iGridDef_Iter << "/" << run_input.n_deform_iters
+      std::cout << "Non-linear iter.: " << iGridDef_Iter << "/" << run_input.n_deform_iters
            << ". Linear iter.: " << LinSolIters << ". Min vol.: " << min_vol
-           << ". Error: " << solver_tolerance << "." <<endl;
+           << ". Error: " << solver_tolerance << "." <<std::endl;
     }
   }
 
@@ -1289,12 +1289,12 @@ void mesh::add_StiffMat_EleQuad(array<double> StiffMatrix_Elem, int id_pt_0,
 void mesh::update(solution* FlowSol)
 {
   // Update grid velocity & transfer to upts, fpts
-  //if (FlowSol->rank==0) cout << "Deform: updating grid velocity" << endl;
+  //if (FlowSol->rank==0) std::cout << "Deform: updating grid velocity" << std::endl;
 
   set_grid_velocity(FlowSol,run_input.dt);
 
   // Update element shape points
-  //if (FlowSol->rank==0) cout << "Deform: updating element shape points" << endl;
+  //if (FlowSol->rank==0) std::cout << "Deform: updating element shape points" << std::endl;
 
   int ele_type, local_id;
   array<double> pos(n_dims);
@@ -1314,7 +1314,7 @@ void mesh::update(solution* FlowSol)
 #endif
 
   // Update element transforms
-  //if (FlowSol->rank==0) cout << "Deform: updating element transforms ... " << endl;
+  //if (FlowSol->rank==0) std::cout << "Deform: updating element transforms ... " << std::endl;
   for(int i=0;i<FlowSol->n_ele_types;i++) {
     if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
       FlowSol->mesh_eles(i)->set_transforms_dynamic();
@@ -1323,7 +1323,7 @@ void mesh::update(solution* FlowSol)
 
   /// if (iter%FlowSol->plot_freq == 0 || iter%FlowSol->restart_dump_freq == 0) {
 //    // Set metrics at interface cubpts
-//    //if (FlowSol->rank==0) cout << "Deform: setting element transforms at interface cubature points ... " << endl;
+//    //if (FlowSol->rank==0) std::cout << "Deform: setting element transforms at interface cubature points ... " << std::endl;
 //    for(int i=0;i<FlowSol->n_ele_types;i++) {
 //      if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
 //        FlowSol->mesh_eles(i)->set_transforms_inters_cubpts();
@@ -1331,7 +1331,7 @@ void mesh::update(solution* FlowSol)
 //    }
 
 //    // Set metrics at volume cubpts
-//    //if (FlowSol->rank==0) cout << "Deform: setting element transforms at volume cubature points ... " << endl;
+//    //if (FlowSol->rank==0) std::cout << "Deform: setting element transforms at volume cubature points ... " << std::endl;
 //    for(int i=0;i<FlowSol->n_ele_types;i++) {
 //      if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
 //        FlowSol->mesh_eles(i)->set_transforms_vol_cubpts();
@@ -1347,49 +1347,49 @@ void mesh::write_mesh(int mesh_type,double sim_time)
   }else if (mesh_type==1) {
     write_mesh_gmsh(sim_time);
   }else{
-    cerr << "Mesh Output Type: " << mesh_type << endl;
+    std::cerr << "Mesh Output Type: " << mesh_type << std::endl;
     FatalError("ERROR: Trying to write unrecognized mesh format ... ");
   }
 }
 
 void mesh::write_mesh_gambit(double sim_time)
 {
-  cout << "Gambit mesh writer not yet implemented!" << endl;
+  std::cout << "Gambit mesh writer not yet implemented!" << std::endl;
 }
 
 void mesh::write_mesh_gmsh(double sim_time)
 {
 
   string filename (run_input.mesh_file);
-  ostringstream sstream;
+  std::ostringstream sstream;
   sstream << sim_time;
   string suffix = "_" + sstream.str();
   int find = suffix.find_first_of(".");
   if (find != suffix.npos) suffix.replace(find,1,"_");
   filename.insert(filename.size()-4,suffix);
 
-  fstream file;
-  file.open(filename.c_str(),ios::out);
+  std::fstream file;
+  file.open(filename.c_str(),std::ios::out);
 
   // write header
-  file << "$MeshFormat" << endl << "2.2 0 8" << endl;
-  file << "$EndMeshFormat" << endl;
+  file << "$MeshFormat" << std::endl << "2.2 0 8" << std::endl;
+  file << "$EndMeshFormat" << std::endl;
 
   // write boundary info
-  file << "$PhysicalNames" << endl << n_bnds << endl;
+  file << "$PhysicalNames" << std::endl << n_bnds << std::endl;
   for (int i=0; i<n_bnds; i++) {
     if (bc_list(i) == -1) {
       file << n_dims << " "; // volume cell
-      file << i+1  << " " << "\"FLUID\"" << endl;
+      file << i+1  << " " << "\"FLUID\"" << std::endl;
     }else{
       file << 1 << " ";  // edge
-      file << i+1  << " " << "\"" << bc_flag[bc_list(i)] << "\"" << endl;
+      file << i+1  << " " << "\"" << bc_flag[bc_list(i)] << "\"" << std::endl;
     }
 
   }
-  file << "$EndPhysicalNames" << endl;
+  file << "$EndPhysicalNames" << std::endl;
   // write nodes
-  file << "$Nodes" << endl << n_verts_global << endl;
+  file << "$Nodes" << std::endl << n_verts_global << std::endl;
   for (int i=0; i<n_verts; i++) {
     file << i+1 << " " << xv(0)(i,0) << " " << xv(0)(i,1) << " ";
     if (n_dims==2) {
@@ -1397,13 +1397,13 @@ void mesh::write_mesh_gmsh(double sim_time)
     }else{
       file << xv(0)(i,2);
     }
-    file << endl;
+    file << std::endl;
   }
-  file << "$EndNodes" << endl;
+  file << "$EndNodes" << std::endl;
 
   // write elements
   // note: n_cells_global not currently defined.  Fix!!  Needed for MPI.
-  file << "$Elements" << endl << n_eles << endl;
+  file << "$Elements" << std::endl << n_eles << std::endl;
   int gmsh_type, bcid;
   int ele_start = 0; // more setup needed for writing from parallel
   for (int i=ele_start; i<ele_start+n_eles; i++) {
@@ -1415,12 +1415,12 @@ void mesh::write_mesh_gmsh(double sim_time)
       if (c2n_v(i)==3) {
         gmsh_type = 2;
         file << i+1  << " " << gmsh_type << " 2 " << bcid << " " << bcid;
-        file << " " << iv2ivg(c2v(i,0))+1 << " " << iv2ivg(c2v(i,1))+1 << " " << iv2ivg(c2v(i,2))+1 << endl;
+        file << " " << iv2ivg(c2v(i,0))+1 << " " << iv2ivg(c2v(i,1))+1 << " " << iv2ivg(c2v(i,2))+1 << std::endl;
       }else if (c2n_v(i)==6) {
         gmsh_type = 9;
         file << i+1  << " " << gmsh_type << " 2 " << bcid << " " << bcid;
         file << " " << iv2ivg(c2v(i,0))+1 << " " << iv2ivg(c2v(i,1))+1 << " " << iv2ivg(c2v(i,2))+1;
-        file << " " << iv2ivg(c2v(i,3))+1 << " " << iv2ivg(c2v(i,4))+1 << " " << iv2ivg(c2v(i,5))+1 << endl;
+        file << " " << iv2ivg(c2v(i,3))+1 << " " << iv2ivg(c2v(i,4))+1 << " " << iv2ivg(c2v(i,5))+1 << std::endl;
       }else if (c2n_v(i)==9) {
         gmsh_type = 21;
         FatalError("Cubic triangle not implemented");
@@ -1430,17 +1430,17 @@ void mesh::write_mesh_gmsh(double sim_time)
       if (c2n_v(i)==4) {
         gmsh_type = 3;
         file << i+1 << " " << gmsh_type << " 2 " << bcid << " " << bcid;
-        file << " " << iv2ivg(c2v(i,0))+1 << " " << iv2ivg(c2v(i,1))+1 << " " << iv2ivg(c2v(i,3))+1 << " " << iv2ivg(c2v(i,2))+1 << endl;
+        file << " " << iv2ivg(c2v(i,0))+1 << " " << iv2ivg(c2v(i,1))+1 << " " << iv2ivg(c2v(i,3))+1 << " " << iv2ivg(c2v(i,2))+1 << std::endl;
       }else if (c2n_v(i)==8) {
         gmsh_type = 16;
         file << i+1 << " " << gmsh_type << " 2 " << bcid << " " << bcid;
         file << " " << iv2ivg(c2v(i,0))+1 << " " << iv2ivg(c2v(i,1))+1 << " " << iv2ivg(c2v(i,2))+1 << " " << iv2ivg(c2v(i,3))+1;
-        file << " " << iv2ivg(c2v(i,4))+1 << " " << iv2ivg(c2v(i,5))+1 << " " << iv2ivg(c2v(i,6))+1 << " " << iv2ivg(c2v(i,7))+1 << endl;
+        file << " " << iv2ivg(c2v(i,4))+1 << " " << iv2ivg(c2v(i,5))+1 << " " << iv2ivg(c2v(i,6))+1 << " " << iv2ivg(c2v(i,7))+1 << std::endl;
       }else if (c2n_v(i)==9) {
         gmsh_type = 10;
         file << i+1 << " " << gmsh_type << " 2 " << bcid << " " << bcid;
         file << " " << iv2ivg(c2v(i,0))+1 << " " << iv2ivg(c2v(i,2))+1 << " " << iv2ivg(c2v(i,8))+1 << " " << iv2ivg(c2v(i,6))+1 << " " << iv2ivg(c2v(i,1))+1;
-        file << " " << iv2ivg(c2v(i,5))+1 << " " << iv2ivg(c2v(i,7))+1 << " " << iv2ivg(c2v(i,3))+1 << " " << iv2ivg(c2v(i,4))+1 << endl;
+        file << " " << iv2ivg(c2v(i,5))+1 << " " << iv2ivg(c2v(i,7))+1 << " " << iv2ivg(c2v(i,3))+1 << " " << iv2ivg(c2v(i,4))+1 << std::endl;
       }
     }else if (ctype(i)==4) {
       //hex
@@ -1448,12 +1448,12 @@ void mesh::write_mesh_gmsh(double sim_time)
         gmsh_type = 5;
         file << i+1  << " " << gmsh_type << " 2 " << bcid << " " << bcid;
         file << " " << iv2ivg(c2v(i,1))+1 << " " << iv2ivg(c2v(i,1))+1 << " " << iv2ivg(c2v(i,3))+1 << " " << iv2ivg(c2v(i,2))+1;
-        file << " " << iv2ivg(c2v(i,4))+1 << " " << iv2ivg(c2v(i,5))+1 << " " << iv2ivg(c2v(i,7))+1 << " " << iv2ivg(c2v(i,6))+1 << endl;
+        file << " " << iv2ivg(c2v(i,4))+1 << " " << iv2ivg(c2v(i,5))+1 << " " << iv2ivg(c2v(i,7))+1 << " " << iv2ivg(c2v(i,6))+1 << std::endl;
       }
     }
   }
-  //cout << "SIZE(e2v): " << e2v.get_dim(0) << "," << e2v.get_dim(1) << endl;
-  //cout << "N_FACES: " << n_faces << endl;
+  //std::cout << "SIZE(e2v): " << e2v.get_dim(0) << "," << e2v.get_dim(1) << std::endl;
+  //std::cout << "N_FACES: " << n_faces << std::endl;
   /* write non-interior 'elements' (boundary faces) */
   /** ONLY FOR 2D CURRENTLY -- To fix, add array<array<int>> boundFaces to mesh class
       * (same as boundPts, but for faces) - since since faces, not edges, needed for 3D */
@@ -1468,22 +1468,22 @@ void mesh::write_mesh_gmsh(double sim_time)
             iv = boundPts(i)(j);
             for (int k=0; k<v2n_e(iv); k++) {
                 edges.insert(v2e(j)(k));
-                cout << "Edge #: " << v2e(j)(k) << endl;
+                std::cout << "Edge #: " << v2e(j)(k) << std::endl;
                 if (v2e(j)(k) > n_faces) {
-                    cout << "** n_faces=" << n_faces << " but v2e(" << j << ")(" << k << ")=" << v2e(j)(k) << "!!" << endl;
+                    std::cout << "** n_faces=" << n_faces << " but v2e(" << j << ")(" << k << ")=" << v2e(j)(k) << "!!" << std::endl;
                     cin.get();
                 }
             }
         }
         set<int>::iterator it;
         for (it=edges.begin(); it!=edges.end(); it++) {
-            file << faceid << " 1 2 " << i+1 << " " << i+1 << " " << e2v(*it,0)+1 << " " << e2v(*it,1)+1 << endl;
-            cout << faceid << " 1 2 " << i+1 << " " << i+1 << " " << e2v(*it,0)+1 << " " << e2v(*it,1)+1 << endl;
+            file << faceid << " 1 2 " << i+1 << " " << i+1 << " " << e2v(*it,0)+1 << " " << e2v(*it,1)+1 << std::endl;
+            std::cout << faceid << " 1 2 " << i+1 << " " << i+1 << " " << e2v(*it,0)+1 << " " << e2v(*it,1)+1 << std::endl;
             faceid++;
         }
     }*/
-  file << "$EndElements" << endl;
-  //cout << "$EndElements" << endl;
+  file << "$EndElements" << std::endl;
+  //std::cout << "$EndElements" << std::endl;
   file.close();
 }
 
@@ -1573,7 +1573,7 @@ double mesh::check_grid(solution* FlowSol) {
 #endif
   /*
     if ((ElemCounter != 0) && (FlowSol->rank == MASTER_NODE))
-        cout <<"There are " << ElemCounter << " elements with negative volume.\n" << endl;
+        std::cout <<"There are " << ElemCounter << " elements with negative volume.\n" << std::endl;
     */
   if (n_dims == 2) return MinArea;
   else return MinVolume;
@@ -1642,7 +1642,7 @@ void mesh::set_boundary_displacements(solution *FlowSol)
   VarCoord(1) = run_input.bound_vel_simple(0)(1)*run_input.dt;*/
   VarCoord(0) = 0;
   VarCoord(1) = run_input.bound_vel_simple(0)(0)*cos(2*run_input.bound_vel_simple(0)(1)*pi*rk_time)*run_input.dt;
-  /// cout << "number of boundaries: " << n_bnds << endl;
+  /// std::cout << "number of boundaries: " << n_bnds << std::endl;
   /*--- Set the known displacements, note that some points of the moving surfaces
     could be on on the symmetry plane, we should specify DeleteValsRowi again (just in case) ---*/
   for (iBound = 0; iBound < n_bnds; iBound++) {

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file geometry.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -22,10 +22,6 @@
  * You should have received a copy of the GNU General Public License
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include <iostream>
-#include <sstream>
-#include <cmath>
 
 #include "../include/global.h"
 #include "../include/array.h"
@@ -51,7 +47,11 @@
 #include "../include/util.h"
 #endif
 
-using namespace std;
+#include <cmath>
+#include <iostream>
+#include <sstream>
+
+//using namespace std;
 
 #define MAX_V_PER_F 4
 #define MAX_F_PER_C 6
@@ -83,7 +83,7 @@ void SetInput(struct solution* FlowSol) {
   /*! Get MPI rank and nproc. */
   MPI_Comm_rank(MPI_COMM_WORLD,&FlowSol->rank);
   MPI_Comm_size(MPI_COMM_WORLD,&FlowSol->nproc);
-  cout << "my_rank=" << FlowSol->rank << endl;
+  std::cout << "my_rank=" << FlowSol->rank << std::endl;
 
 #ifdef _GPU
 
@@ -91,14 +91,14 @@ void SetInput(struct solution* FlowSol) {
 
   // Cluster:
 #ifdef _YOSEMITESAM
-  if (FlowSol->rank==0) { cout << "setting CUDA devices on yosemitesam ..." << endl; }
+  if (FlowSol->rank==0) { std::cout << "setting CUDA devices on yosemitesam ..." << std::endl; }
   if ((FlowSol->rank%2)==0) { cudaSetDevice(0); }
   if ((FlowSol->rank%2)==1) { cudaSetDevice(1); }
 #endif
 
   // Enrico:
 #ifdef _ENRICO
-  if (FlowSol->rank==0) { cout << "setting CUDA devices on enrico ..." << endl; }
+  if (FlowSol->rank==0) { std::cout << "setting CUDA devices on enrico ..." << std::endl; }
   if (FlowSol->rank==0) { cudaSetDevice(2); }
   else if (FlowSol->rank==1) { cudaSetDevice(0); }
   else if (FlowSol->rank==2) { cudaSetDevice(3); }
@@ -125,7 +125,7 @@ int get_bc_number(string& bcname) {
   std::transform(bcname.begin(), bcname.end(), bcname.begin(), ::tolower);
 
   if (!bcname.compare("sub_in_simp")) bcflag = 1;         // Subsonic inflow simple (free pressure) //
-  else if (!bcname.compare("sub_out_simp")) bcflag = 2;   // Subsonic outflow simple (fixed pressure) //
+  else if (!bcname.compare("sub_out_simp")) bcflag = 2;   // Subsonic outflow simple (std::fixed pressure) //
   else if (!bcname.compare("sub_in_char")) bcflag = 3;    // Subsonic inflow characteristic //
   else if (!bcname.compare("sub_out_char")) bcflag = 4;   // Subsonic outflow characteristic //
   else if (!bcname.compare("sup_in")) bcflag = 5;         // Supersonic inflow //
@@ -141,7 +141,7 @@ int get_bc_number(string& bcname) {
   else if (!bcname.compare("ad_wall")) bcflag = 50;       // Advection, Advection-Diffusion Boundary Conditions //
   else
   {
-    cout << "Boundary = " << bcname << endl;
+    std::cout << "Boundary = " << bcname << std::endl;
     FatalError("Boundary condition not recognized");
   }
 
@@ -190,13 +190,13 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
   array<int> icvsta, icvert;
 
   // Compute connectivity
-  if (FlowSol->rank==0) cout << "Setting up mesh connectivity" << endl;
+  if (FlowSol->rank==0) std::cout << "Setting up mesh connectivity" << std::endl;
 
   //CompConnectivity(c2v, c2n_v, ctype, c2f, c2e, f2c, f2loc_f, f2v, f2nv, rot_tag, unmatched_inters, n_unmatched_inters, icvsta, icvert, FlowSol->num_inters, FlowSol->num_edges, FlowSol);
   CompConnectivity(c2v, c2n_v, ctype, c2f, c2e, f2c, f2loc_f, f2v, f2nv, Mesh.e2v, Mesh.v2n_e, Mesh.v2e, rot_tag,
                    unmatched_inters, n_unmatched_inters, icvsta, icvert, FlowSol->num_inters, FlowSol->num_edges, FlowSol);
 
-  if (FlowSol->rank==0) cout << "Done setting up mesh connectivity" << endl;
+  if (FlowSol->rank==0) std::cout << "Done setting up mesh connectivity" << std::endl;
 
   // Reading boundaries
   //ReadBound(run_input.mesh_file,c2v,c2n_v,ctype,bctype_c,ic2icg,icvsta,icvert,iv2ivg,FlowSol->num_eles,FlowSol->num_verts, FlowSol);
@@ -285,20 +285,20 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
     }
 
   if (FlowSol->rank==0)
-    cout << endl << "---------------- Flux Reconstruction Preprocessing ----------------" << endl;
+    std::cout << std::endl << "---------------- Flux Reconstruction Preprocessing ----------------" << std::endl;
 
-  if (FlowSol->rank==0) cout << "initializing elements" << endl;
-  if (FlowSol->rank==0) cout << "tris" << endl;
+  if (FlowSol->rank==0) std::cout << "initializing elements" << std::endl;
+  if (FlowSol->rank==0) std::cout << "tris" << std::endl;
   FlowSol->mesh_eles_tris.setup(num_tris,max_n_spts_per_tri);
-  if (FlowSol->rank==0) cout << "quads" << endl;
+  if (FlowSol->rank==0) std::cout << "quads" << std::endl;
   FlowSol->mesh_eles_quads.setup(num_quads,max_n_spts_per_quad);
-  if (FlowSol->rank==0) cout << "tets" << endl;
+  if (FlowSol->rank==0) std::cout << "tets" << std::endl;
   FlowSol->mesh_eles_tets.setup(num_tets,max_n_spts_per_tet);
-  if (FlowSol->rank==0) cout << "pris" << endl;
+  if (FlowSol->rank==0) std::cout << "pris" << std::endl;
   FlowSol->mesh_eles_pris.setup(num_pris,max_n_spts_per_pri);
-  if (FlowSol->rank==0) cout << "hexas" << endl;
+  if (FlowSol->rank==0) std::cout << "hexas" << std::endl;
   FlowSol->mesh_eles_hexas.setup(num_hexas,max_n_spts_per_hexa);
-  if (FlowSol->rank==0) cout << "done initializing elements" << endl;
+  if (FlowSol->rank==0) std::cout << "done initializing elements" << std::endl;
 
   // Set shape for each cell
   array<int> local_c(FlowSol->num_eles);
@@ -311,7 +311,7 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
 
   array<double> pos(FlowSol->n_dims);
 
-  if (FlowSol->rank==0) cout << "setting elements shape ... ";
+  if (FlowSol->rank==0) std::cout << "setting elements shape ... ";
   for (int i=0;i<FlowSol->num_eles;i++) {
       if (ctype(i) == 0) //tri
         {
@@ -408,10 +408,10 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
           hexas_count++;
         }
     }
-  if (FlowSol->rank==0) cout << "done." << endl;
+  if (FlowSol->rank==0) std::cout << "done." << std::endl;
 
   // Pre-compute shape basis - CRITICAL for deforming-mesh performance
-  if (FlowSol->rank==0) cout << "pre-computing nodal shape-basis functions ... " << flush;
+  if (FlowSol->rank==0) std::cout << "pre-computing nodal shape-basis functions ... " << std::flush;
   for(int i=0;i<FlowSol->n_ele_types;i++) {
     if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
       FlowSol->mesh_eles(i)->store_nodal_s_basis_fpts();
@@ -423,10 +423,10 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
       FlowSol->mesh_eles(i)->store_d_nodal_s_basis_inters_cubpts();
     }
   }
-  if (FlowSol->rank==0) cout << "done." << endl;
+  if (FlowSol->rank==0) std::cout << "done." << std::endl;
 
   // set transforms
-  if (FlowSol->rank==0) cout << "setting element transforms ... " << endl;
+  if (FlowSol->rank==0) std::cout << "setting element transforms ... " << std::endl;
   for(int i=0;i<FlowSol->n_ele_types;i++) {
     if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
       FlowSol->mesh_eles(i)->set_transforms();
@@ -434,34 +434,35 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
         FlowSol->mesh_eles(i)->set_transforms_dynamic();
     }
   }
-  if (FlowSol->rank==0) cout << "done." << endl;
+  if (FlowSol->rank==0) std::cout << "done." << std::endl;
 
   // Initialize grid velocity variables & set to 0
-  if (FlowSol->rank==0) cout << "initializing grid velocity to 0 ... " << flush;
+  if (FlowSol->rank==0) std::cout << "initializing grid velocity to 0 ... " << std::flush;
   for(int i=0;i<FlowSol->n_ele_types;i++) {
     if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
       FlowSol->mesh_eles(i)->initialize_grid_vel(max_n_spts(i));
     }
   }
-  if (FlowSol->rank==0) cout << "done." << endl;
+  if (FlowSol->rank==0) std::cout << "done." << std::endl;
 
   // Set metrics at interface cubpts
-  if (FlowSol->rank==0) cout << "setting element transforms at interface cubpts ... ";
+  if (FlowSol->rank==0) std::cout << "setting element transforms at interface cubpts ... ";
   for(int i=0;i<FlowSol->n_ele_types;i++) {
       if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
           FlowSol->mesh_eles(i)->set_transforms_inters_cubpts();
+          FlowSol->mesh_eles(i)->set_transforms_vol_cubpts();
         }
     }
-  if (FlowSol->rank==0) cout << "done." << endl;
+  if (FlowSol->rank==0) std::cout << "done." << std::endl;
 
   // Set metrics at volume cubpts. Only needed for computing error and integral diagnostic quantities.
   if (run_input.test_case != 0 || run_input.monitor_integrals_freq!=0) {
-    if (FlowSol->rank==0) cout << "setting element transforms at volume cubpts ... " << endl;
+    if (FlowSol->rank==0) std::cout << "setting element transforms at volume cubpts ... " << std::endl;
     for(int i=0;i<FlowSol->n_ele_types;i++) {
       if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
         FlowSol->mesh_eles(i)->store_nodal_s_basis_vol_cubpts();
         FlowSol->mesh_eles(i)->store_d_nodal_s_basis_vol_cubpts();
-        FlowSol->mesh_eles(i)->set_transforms_vol_cubpts();
+        //FlowSol->mesh_eles(i)->set_transforms_vol_cubpts();
       }
     }
   }
@@ -471,7 +472,7 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
       for(int i=0;i<FlowSol->n_ele_types;i++) {
           if (FlowSol->mesh_eles(i)->get_n_eles()!=0) {
 
-              if (FlowSol->rank==0) cout << "Moving eles to GPU ... " << endl;
+              if (FlowSol->rank==0) std::cout << "Moving eles to GPU ... " << std::endl;
               FlowSol->mesh_eles(i)->mv_all_cpu_gpu();
             }
         }
@@ -583,8 +584,8 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
 
           if (FlowSol->nproc==1)
             {
-              cout << "ic=" << f2c(i,0) << endl;
-              cout << "local_face=" << f2loc_f(i,0) << endl;
+              std::cout << "ic=" << f2c(i,0) << std::endl;
+              std::cout << "local_face=" << f2loc_f(i,0) << std::endl;
               FatalError("Should not be here");
             }
 
@@ -810,7 +811,7 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
   // Flag interfaces for calculating LES wall model
   if(run_input.wall_model>0 or run_input.turb_model>0) {
 
-    if (FlowSol->rank==0) cout << "calculating wall distance... " << endl;
+    if (FlowSol->rank==0) std::cout << "calculating wall distance... " << std::endl;
 
     int n_seg_noslip_inters = 0;
     int n_tri_noslip_inters = 0;
@@ -972,14 +973,14 @@ void GeoPreprocess(struct solution* FlowSol, mesh &Mesh) {
 
   // set on GPU
 #ifdef _GPU
-      if (FlowSol->rank==0) cout << "Moving interfaces to GPU ... " << endl;
+      if (FlowSol->rank==0) std::cout << "Moving interfaces to GPU ... " << std::endl;
       for(int i=0;i<FlowSol->n_int_inter_types;i++)
         FlowSol->mesh_int_inters(i).mv_all_cpu_gpu();
 
       for(int i=0;i<FlowSol->n_bdy_inter_types;i++)
         FlowSol->mesh_bdy_inters(i).mv_all_cpu_gpu();
 
-      if (FlowSol->rank==0) cout << "Moving wall_distance to GPU ... " << endl;
+      if (FlowSol->rank==0) std::cout << "Moving wall_distance to GPU ... " << std::endl;
       for(int i=0;i<FlowSol->n_ele_types;i++)
         FlowSol->mesh_eles(i)->mv_wall_distance_cpu_gpu();
 
@@ -993,9 +994,9 @@ void ReadMesh(string& in_file_name, array<double>& out_xv, array<int>& out_c2v, 
               array<int>& out_iv2ivg, int& out_n_cells, int& out_n_verts, int& out_n_verts_global, struct solution* FlowSol)
 {
   if (FlowSol->rank==0)
-    cout << endl << "----------------------- Mesh Preprocessing ------------------------" << endl;
+    std::cout << std::endl << "----------------------- Mesh Preprocessing ------------------------" << std::endl;
 
-  if (FlowSol->rank==0) cout << "reading connectivity ... " << endl;
+  if (FlowSol->rank==0) std::cout << "reading connectivity ... " << std::endl;
   if (run_input.mesh_format==0) { // Gambit
     read_connectivity_gambit(in_file_name, out_n_cells, out_c2v, out_c2n_v, out_ctype, out_ic2icg, FlowSol);
   }
@@ -1005,7 +1006,7 @@ void ReadMesh(string& in_file_name, array<double>& out_xv, array<int>& out_c2v, 
   else {
     FatalError("Mesh format not recognized");
   }
-  if (FlowSol->rank==0) cout << "done reading connectivity" << endl;
+  if (FlowSol->rank==0) std::cout << "done reading connectivity" << std::endl;
 
 #ifdef _MPI
   // Call method to repartition the mesh
@@ -1013,7 +1014,7 @@ void ReadMesh(string& in_file_name, array<double>& out_xv, array<int>& out_c2v, 
     repartition_mesh(out_n_cells, out_c2v, out_c2n_v, out_ctype, out_ic2icg,FlowSol);
 #endif
 
-  if (FlowSol->rank==0) cout << "reading vertices" << endl;
+  if (FlowSol->rank==0) std::cout << "reading vertices" << std::endl;
 
   // Call method to create array iv2ivg and modify c2v using local vertex indices
   array<int> iv2ivg;
@@ -1029,7 +1030,7 @@ void ReadMesh(string& in_file_name, array<double>& out_xv, array<int>& out_c2v, 
   else { FatalError("Mesh format not recognized"); }
 
   out_n_verts = n_verts;
-  if (FlowSol->rank==0) cout << "done reading vertices" << endl;
+  if (FlowSol->rank==0) std::cout << "done reading vertices" << std::endl;
 
 }
 
@@ -1039,7 +1040,7 @@ void ReadBound(string& in_file_name, array<int>& in_c2v, array<int>& in_c2n_v, a
                struct solution* FlowSol)
 {
 
-  if (FlowSol->rank==0) cout << "reading boundary conditions" << endl;
+  if (FlowSol->rank==0) std::cout << "reading boundary conditions" << std::endl;
   // Set the boundary conditions
   // HACK
   out_bctype.setup(in_n_cells,MAX_F_PER_C);
@@ -1061,7 +1062,7 @@ void ReadBound(string& in_file_name, array<int>& in_c2v, array<int>& in_c2n_v, a
     FatalError("Mesh format not recognized");
   }
 
-  if (FlowSol->rank==0) cout << "done reading boundary conditions" << endl;
+  if (FlowSol->rank==0) std::cout << "done reading boundary conditions" << std::endl;
 }
 
 void create_boundpts(array<array<int> >& out_boundpts, array<int>& in_bclist, array<int>& out_bound_flag, array<array<int> >& in_bccells,
@@ -1092,7 +1093,7 @@ void create_boundpts(array<array<int> >& out_boundpts, array<int>& in_bclist, ar
   /** --- CREATE BOUNDARY->POINTS STRUCTURE ---
     want: iv = boundpts(bcflag,ivert); */
   out_boundpts.setup(n_bcs);
-  array<set<int> > Bounds(n_bcs);
+  array<std::set<int> > Bounds(n_bcs);
   for (int i=0; i<n_bcs; i++) {
     nv = 0;
     bcflag = in_bclist(i);
@@ -1111,7 +1112,7 @@ void create_boundpts(array<array<int> >& out_boundpts, array<int>& in_bclist, ar
     }
     out_boundpts(i).setup(Bounds(i).size());
     int j = 0;
-    for (set<int>::iterator it=Bounds(i).begin(); it!=Bounds(i).end(); it++) {
+    for (std::set<int>::iterator it=Bounds(i).begin(); it!=Bounds(i).end(); it++) {
       out_boundpts(i)(j) = (*it);
       j++;
     }
@@ -1127,7 +1128,7 @@ void read_boundary_gambit(string& in_file_name, int &in_n_cells, array<int>& in_
   // output: bctype
 
   char buf[BUFSIZ]={""};
-  ifstream mesh_file;
+  std::ifstream mesh_file;
 
   array<int> cell_list(in_n_cells);
 
@@ -1154,7 +1155,7 @@ void read_boundary_gambit(string& in_file_name, int &in_n_cells, array<int>& in_
                   >> n_mats         // num material groups
                   >> n_bcs          // num boundary groups
                   >> dummy;         // num space dimensions
-  //cout << "Gambit mesh specs from header: " << ", " << n_verts_global << ", " << n_cells_global << ", " << n_mats << ", " << n_bcs << ", " << dummy << endl;
+  //std::cout << "Gambit mesh specs from header: " << ", " << n_verts_global << ", " << n_cells_global << ", " << n_mats << ", " << n_bcs << ", " << dummy << std::endl;
   mesh_file.getline(buf,BUFSIZ);  // clear rest of line
   mesh_file.getline(buf,BUFSIZ);  // Skip 2 lines
   mesh_file.getline(buf,BUFSIZ);
@@ -1190,8 +1191,8 @@ void read_boundary_gambit(string& in_file_name, int &in_n_cells, array<int>& in_
       mesh_file.getline(buf,BUFSIZ); // Read GROUP: 1 ELEMENTS
       int nread = sscanf(buf,"%*s%d%*s%d%*s%d",&dummy,&gnel,&dummy2);
       if (3!=nread) {
-          cout << "ERROR while reading Gambit file" << endl;
-          cout << "nread =" << nread << endl; exit(1);
+          std::cout << "ERROR while reading Gambit file" << std::endl;
+          std::cout << "nread =" << nread << std::endl; exit(1);
         }
       mesh_file.getline(buf,BUFSIZ); // Read group name
       mesh_file.getline(buf,BUFSIZ); // Skip solver dependant flag
@@ -1281,7 +1282,7 @@ void read_boundary_gambit(string& in_file_name, int &in_n_cells, array<int>& in_
       }
       else
       {
-        cout << "Element Type = " << eleType << endl;
+        std::cout << "Element Type = " << eleType << std::endl;
         FatalError("Cannot handle other element type in readbnd");
       }
 
@@ -1312,7 +1313,7 @@ void read_boundary_gmsh(string& in_file_name, int &in_n_cells, array<int>& in_ic
 {
   string str;
 
-  ifstream mesh_file;
+  std::ifstream mesh_file;
 
   mesh_file.open(&in_file_name[0]);
   if (!mesh_file)
@@ -1371,7 +1372,7 @@ void read_boundary_gmsh(string& in_file_name, int &in_n_cells, array<int>& in_ic
 
   // --- setup vertex->bcflag array ---
   out_boundpts.setup(n_bcs);
-  array<set<int> > Bounds;
+  array<std::set<int> > Bounds;
   Bounds.setup(n_bcs);
 
   //--- overwrite bc_list with bcflag (previously held gmsh bcid) ---
@@ -1456,7 +1457,7 @@ void read_boundary_gmsh(string& in_file_name, int &in_n_cells, array<int>& in_ic
       }
       else 
       {
-        cout << "Gmsh boundary element type: " << elmtype << endl;
+        std::cout << "Gmsh boundary element type: " << elmtype << std::endl;
         FatalError("Boundary elmtype not recognized");
       }
 
@@ -1518,7 +1519,7 @@ void read_boundary_gmsh(string& in_file_name, int &in_n_cells, array<int>& in_ic
             }
           if (found==0)
           {
-            cout << "vlist_bound(2)=" << vlist_bound(2) << " vlist_bound(3)=" << vlist_bound(3) << endl;
+            std::cout << "vlist_bound(2)=" << vlist_bound(2) << " vlist_bound(3)=" << vlist_bound(3) << std::endl;
             FatalError("All nodes of boundary face belong to processor but could not find the coresponding faces");
           }
 
@@ -1526,7 +1527,7 @@ void read_boundary_gmsh(string& in_file_name, int &in_n_cells, array<int>& in_ic
 
     } // Loop over entities
 
-  set<int>::iterator it;
+  std::set<int>::iterator it;
   for (int i=0; i<n_bcs; i++) {
     out_boundpts(i).setup(Bounds(i).size());
     int j=0;
@@ -1538,14 +1539,14 @@ void read_boundary_gmsh(string& in_file_name, int &in_n_cells, array<int>& in_ic
 
   mesh_file.close();
 
-  //cout << "  Number of Boundary Faces: " << bdy_count << endl;
+  //std::cout << "  Number of Boundary Faces: " << bdy_count << std::endl;
 }
 
 void read_vertices_gambit(string& in_file_name, int in_n_verts, int &out_n_verts_global, array<int> &in_iv2ivg, array<double> &out_xv, solution *FlowSol)
 {
 
   // Now open gambit file and read the vertices
-  ifstream mesh_file;
+  std::ifstream mesh_file;
   char buf[BUFSIZ]={""};
 
   mesh_file.open(&in_file_name[0]);
@@ -1597,7 +1598,7 @@ void read_vertices_gmsh(string& in_file_name, int in_n_verts, int& out_n_verts_g
   string str;
 
   // Now open gambit file and read the vertices
-  ifstream mesh_file;
+  std::ifstream mesh_file;
   char buf[BUFSIZ]={""};
 
   mesh_file.open(&in_file_name[0]);
@@ -1710,7 +1711,7 @@ void read_connectivity_gambit(string& in_file_name, int &out_n_cells, array<int>
   int dummy,dummy2;
 
   char buf[BUFSIZ]={""};
-  ifstream mesh_file;
+  std::ifstream mesh_file;
 
   mesh_file.open(&in_file_name[0]);
   if (!mesh_file)
@@ -1855,7 +1856,7 @@ void read_connectivity_gambit(string& in_file_name, int &out_n_cells, array<int>
         }
       else
       {
-        cout << "Element Type = " << out_ctype(i) << endl;
+        std::cout << "Element Type = " << out_ctype(i) << std::endl;
         FatalError("Haven't implemented this element type in gambit_meshreader3, exiting ");
       }
       mesh_file.getline(buf,BUFSIZ); // skip end of line
@@ -1886,7 +1887,7 @@ void read_connectivity_gmsh(string& in_file_name, int &out_n_cells, array<int> &
   char buf[BUFSIZ]={""};
   char bcTXT[100][100];// can read up to 100 different boundary conditions
   char bc_txt_temp[100];
-  ifstream mesh_file;
+  std::ifstream mesh_file;
 
   string str;
   
@@ -1990,7 +1991,7 @@ void read_connectivity_gmsh(string& in_file_name, int &out_n_cells, array<int> &
 
   // Move cursor to $Elements
   mesh_file.clear();
-  mesh_file.seekg(0, ios::beg);
+  mesh_file.seekg(0, std::ios::beg);
   while(1) {
       getline(mesh_file,str);
       if (str.find("$Elements")!=string::npos) break;
@@ -2099,7 +2100,7 @@ void read_connectivity_gmsh(string& in_file_name, int &out_n_cells, array<int> &
                 }
               else
                 {
-                  cout << "elmtype=" << elmtype << endl;
+                  std::cout << "elmtype=" << elmtype << std::endl;
                   FatalError("element type not recognized");
                 }
 
@@ -2179,7 +2180,7 @@ void repartition_mesh(int &out_n_cells, array<int> &out_c2v, array<int> &out_c2n
       else if (ctype_temp(i)==4)
         eptr[i+1] = eptr[i] + 8;
       else
-        cout << "unknown element type, in repartitioning" << endl;
+        std::cout << "unknown element type, in repartitioning" << std::endl;
     }
 
   // local element to vertex
@@ -2255,7 +2256,7 @@ void repartition_mesh(int &out_n_cells, array<int> &out_c2v, array<int> &out_c2n
   int edgecut;
   int *part= (int*) calloc(klocal,sizeof(int));
 
-  if (FlowSol->rank==0) cout << "Before parmetis" << endl;
+  if (FlowSol->rank==0) std::cout << "Before parmetis" << std::endl;
 
   ParMETIS_V3_PartMeshKway
       (elmdist,
@@ -2274,7 +2275,7 @@ void repartition_mesh(int &out_n_cells, array<int> &out_c2v, array<int> &out_c2n
        part,
        &comm);
 
-  if (FlowSol->rank==0) cout << "After parmetis " << endl;
+  if (FlowSol->rank==0) std::cout << "After parmetis " << std::endl;
 
   // Printing results of parmetis
   //array<int> part_array(klocal);
@@ -2283,7 +2284,7 @@ void repartition_mesh(int &out_n_cells, array<int> &out_c2v, array<int> &out_c2n
   //  part_array(i) = part[i];
   //}
   //part_array.print_to_file(FlowSol->rank);
-  //cout << "After print" << endl;
+  //std::cout << "After print" << std::endl;
 
   // Now creating new c2v array
   int **outlist = (int**) calloc(FlowSol->nproc,sizeof(int*));
@@ -2495,7 +2496,7 @@ void CompConnectivity(array<int>& in_c2v, array<int>& in_c2n_v, array<int>& in_c
     k = k+v2n_c(iv);
   }
 
-  //cout << "Maximum number of cells who share same vertex = " << max << endl;
+  //std::cout << "Maximum number of cells who share same vertex = " << max << std::endl;
   if (max_nc>max_cells_per_vert)
     FatalError("ERROR: some vertices are shared by more than max_cells_per_vert");
 
@@ -2516,7 +2517,7 @@ void CompConnectivity(array<int>& in_c2v, array<int>& in_c2n_v, array<int>& in_c
   if (FlowSol->n_dims==3 || run_input.motion!=0)
   {
     vector<int> e2v;
-    vector<set<int> > v2e(n_verts);
+    vector<std::set<int> > v2e(n_verts);
 
       // Create array ic2e
       array<int> num_e_per_c(5);
@@ -2587,7 +2588,7 @@ void CompConnectivity(array<int>& in_c2v, array<int>& in_c2n_v, array<int>& in_c
       } // Loop over cells
       out_n_edges++; // 0-index -> actual value
 
-      set<int>::iterator it;
+      std::set<int>::iterator it;
       // consider reversing for better use of CPU cache
       out_e2v.setup(out_n_edges,2);
       for (int ie=0; ie<out_n_edges; ie++) {
@@ -3148,8 +3149,8 @@ void get_vlist_loc_face(int& in_ctype, int& in_n_spts, int& in_face, array<int>&
         }
       else
         {
-          cout << "in_nspts=" << in_n_spts << endl;
-          cout << "ctype=" << in_ctype<< endl;
+          std::cout << "in_nspts=" << in_n_spts << std::endl;
+          std::cout << "ctype=" << in_ctype<< std::endl;
           FatalError("in_nspt not implemented");
         }
     }
@@ -3357,7 +3358,7 @@ void get_vlist_loc_face(int& in_ctype, int& in_n_spts, int& in_face, array<int>&
     }
   else
   {
-    cout << "in_ctype = " << in_ctype << endl;
+    std::cout << "in_ctype = " << in_ctype << std::endl;
     FatalError("ERROR: Haven't implemented other 3D Elements yet");
   }
 
@@ -3809,8 +3810,8 @@ void match_mpifaces(array<int> &in_f2v, array<int> &in_f2nv, array<double>& in_x
     {
       if (!matched(i))
         {
-          cout << "Some mpi_faces were not matched!!! could try changing tol, exiting!" << endl;
-          cout << "rank=" << FlowSol->rank << "i=" << i << endl;
+          std::cout << "Some mpi_faces were not matched!!! could try changing tol, exiting!" << std::endl;
+          std::cout << "rank=" << FlowSol->rank << "i=" << i << std::endl;
           exit(1);
         }
     }

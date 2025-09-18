@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file vector_structure.cpp
  * \brief Main classes required for solving linear systems of equations
  * \author - Original Author: Aerospace Design Laboratory (Stanford University) <http://su2.stanford.edu>.
@@ -39,8 +39,8 @@ CSysVector::CSysVector(const unsigned long & size, const double & val) {
   
   /*--- Check for invalid size, then allocate memory and initialize values ---*/
   if ( (nElm <= 0) || (nElm >= UINT_MAX) ) {
-    cerr << "CSysVector::CSysVector(unsigned int,double): "
-    << "invalid input: size = " << size << endl;
+    std::cerr << "CSysVector::CSysVector(unsigned int,double): "
+    << "invalid input: size = " << size << std::endl;
     throw(-1);
   }
 
@@ -65,11 +65,11 @@ CSysVector::CSysVector(const unsigned long & numBlk, const unsigned long & numBl
   
   /*--- Check for invalid input, then allocate memory and initialize values ---*/
   if ( (nElm <= 0) || (nElm >= ULONG_MAX) ) {
-    cerr << "CSysVector::CSysVector(unsigned int,unsigned int,double): "
-    << "invalid input: numBlk, numVar = " << numBlk << "," << numVar << endl;
+    std::cerr << "CSysVector::CSysVector(unsigned int,unsigned int,double): "
+    << "invalid input: numBlk, numVar = " << numBlk << "," << numVar << std::endl;
     throw(-1);
   }
-	
+    
   vec_val = new double[nElm];
   for (unsigned int i = 0; i < nElm; i++)
     vec_val[i] = val;
@@ -108,8 +108,8 @@ CSysVector::CSysVector(const unsigned long & size, const double* u_array) {
   
   /*--- Check for invalid size, then allocate memory and initialize values ---*/
   if ( (nElm <= 0) || (nElm >= ULONG_MAX) ) {
-    cerr << "CSysVector::CSysVector(unsigned int, double*): "
-    << "invalid input: size = " << size << endl;
+    std::cerr << "CSysVector::CSysVector(unsigned int, double*): "
+    << "invalid input: size = " << size << std::endl;
     throw(-1);
   }
 
@@ -134,8 +134,8 @@ CSysVector::CSysVector(const unsigned long & numBlk, const unsigned long & numBl
   
   /*--- check for invalid input, then allocate memory and initialize values ---*/
   if ( (nElm <= 0) || (nElm >= ULONG_MAX) ) {
-    cerr << "CSysVector::CSysVector(unsigned int,unsigned int,double*): "
-    << "invalid input: numBlk, numVar = " << numBlk << "," << numVar << endl;
+    std::cerr << "CSysVector::CSysVector(unsigned int,unsigned int,double*): "
+    << "invalid input: numBlk, numVar = " << numBlk << "," << numVar << std::endl;
     throw(-1);
   }
 
@@ -176,11 +176,11 @@ void CSysVector::Initialize(const unsigned long & numBlk, const unsigned short &
   
   /*--- Check for invalid input, then allocate memory and initialize values ---*/
   if ( (nElm <= 0) || (nElm >= ULONG_MAX) ) {
-    cerr << "CSysVector::CSysVector(unsigned int,unsigned int,double): "
-    << "invalid input: numBlk, numVar = " << numBlk << "," << numVar << endl;
+    std::cerr << "CSysVector::CSysVector(unsigned int,unsigned int,double): "
+    << "invalid input: numBlk, numVar = " << numBlk << "," << numVar << std::endl;
     throw(-1);
   }
-	
+    
   vec_val = new double[nElm];
   for (unsigned long i = 0; i < nElm; i++)
     vec_val[i] = val;
@@ -196,7 +196,7 @@ void CSysVector::Initialize(const unsigned long & numBlk, const unsigned short &
 void CSysVector::Equals_AX(const double & a, CSysVector & x) {
   /*--- check that *this and x are compatible ---*/
   if (nElm != x.nElm) {
-    cerr << "CSysVector::Equals_AX(): " << "sizes do not match";
+    std::cerr << "CSysVector::Equals_AX(): " << "sizes do not match";
     throw(-1);
   }
   for (unsigned long i = 0; i < nElm; i++)
@@ -206,7 +206,7 @@ void CSysVector::Equals_AX(const double & a, CSysVector & x) {
 void CSysVector::Plus_AX(const double & a, CSysVector & x) {
   /*--- check that *this and x are compatible ---*/
   if (nElm != x.nElm) {
-    cerr << "CSysVector::Plus_AX(): " << "sizes do not match";
+    std::cerr << "CSysVector::Plus_AX(): " << "sizes do not match";
     throw(-1);
   }
   for (unsigned long i = 0; i < nElm; i++)
@@ -216,7 +216,7 @@ void CSysVector::Plus_AX(const double & a, CSysVector & x) {
 void CSysVector::Equals_AX_Plus_BY(const double & a, CSysVector & x, const double & b, CSysVector & y) {
   /*--- check that *this, x and y are compatible ---*/
   if ((nElm != x.nElm) || (nElm != y.nElm)) {
-    cerr << "CSysVector::Equals_AX_Plus_BY(): " << "sizes do not match";
+    std::cerr << "CSysVector::Equals_AX_Plus_BY(): " << "sizes do not match";
     throw(-1);
   }
   for (unsigned long i = 0; i < nElm; i++)
@@ -233,7 +233,7 @@ CSysVector & CSysVector::operator=(const CSysVector & u) {
   nElmDomain = u.nElmDomain;
   
   nBlk = u.nBlk;
-	nBlkDomain = u.nBlkDomain;
+    nBlkDomain = u.nBlkDomain;
   
   nVar = u.nVar;
   vec_val = new double[nElm];
@@ -266,7 +266,7 @@ CSysVector & CSysVector::operator+=(const CSysVector & u) {
   
   /*--- Check for consistent sizes, then add elements ---*/
   if (nElm != u.nElm) {
-    cerr << "CSysVector::operator+=(CSysVector): " << "sizes do not match";
+    std::cerr << "CSysVector::operator+=(CSysVector): " << "sizes do not match";
     throw(-1);
   }
   for (unsigned long i = 0; i < nElm; i++)
@@ -286,7 +286,7 @@ CSysVector & CSysVector::operator-=(const CSysVector & u) {
   
   /*--- Check for consistent sizes, then subtract elements ---*/
   if (nElm != u.nElm) {
-    cerr << "CSysVector::operator-=(CSysVector): " << "sizes do not match";
+    std::cerr << "CSysVector::operator-=(CSysVector): " << "sizes do not match";
     throw(-1);
   }
   for (unsigned long i = 0; i < nElm; i++)
@@ -340,7 +340,7 @@ double CSysVector::norm() const {
   /*--- just call dotProd on this*, then sqrt ---*/
   double val = dotProd(*this,*this);
   if (val < 0.0) {
-    cerr << "CSysVector::norm(): " << "inner product of CSysVector is negative";
+    std::cerr << "CSysVector::norm(): " << "inner product of CSysVector is negative";
     throw(-1);
   }
   return sqrt(val);
@@ -401,7 +401,7 @@ double dotProd(const CSysVector & u, const CSysVector & v) {
   
   /*--- check for consistent sizes ---*/
   if (u.nElm != v.nElm) {
-    cerr << "CSysVector friend dotProd(CSysVector,CSysVector): "
+    std::cerr << "CSysVector friend dotProd(CSysVector,CSysVector): "
     << "CSysVector sizes do not match";
     throw(-1);
   }

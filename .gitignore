@@ -70,3 +70,9 @@ build/
 xcuserdata
 xcuserstate
 *.moved-aside
+
+# Visual Studio
+build/msvc/.vs
+build/msvc/obj
+build/msvc/bin
+*.vcxproj.user

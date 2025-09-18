@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file eles_tets.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,9 +23,15 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iomanip>
-#include <iostream>
-#include <cmath>
+#include "../include/global.h"
+#include "../include/eles.h"
+#include "../include/eles_tets.h"
+#include "../include/array.h"
+#include "../include/funcs.h"
+#include "../include/error.h"
+#include "../include/cubature_tri.h"
+#include "../include/cubature_tet.h"
+
 
 #if defined _ACCELERATE_BLAS
 #include <Accelerate/Accelerate.h>
@@ -43,16 +49,15 @@ extern "C"
 }
 #endif
 
-#include "../include/global.h"
-#include "../include/eles.h"
-#include "../include/eles_tets.h"
-#include "../include/array.h"
-#include "../include/funcs.h"
-#include "../include/error.h"
-#include "../include/cubature_tri.h"
-#include "../include/cubature_tet.h"
+#if defined _OPEN_BLAS
+#include "openblas/cblas.h"
+#endif
 
-using namespace std;
+#include <iomanip>
+#include <iostream>
+#include <cmath>
+
+//using namespace std;
 
 // #### constructors ####
 
@@ -68,7 +73,7 @@ eles_tets::eles_tets()
 void eles_tets::setup_ele_type_specific()
 {
 #ifndef _MPI
-  cout << "Initializing tets" << endl;
+  std::cout << "Initializing tets" << std::endl;
 #endif
 
   ele_type=2;
@@ -262,7 +267,7 @@ void eles_tets::set_loc_upts(void)
     }
   else
     {
-      cout << "Error: Unknown solution points location type...." << endl;
+      std::cout << "Error: Unknown solution points location type...." << std::endl;
       exit(1);
     }
 
@@ -490,8 +495,8 @@ double eles_tets::compute_inter_detjac_inters_cubpts(int in_inter,array<double> 
       xv = xs-xt;
       yv = ys-yt;
       zv = zs-zt;
-      //cout << "xu=" << xu << "yu=" << yu << "zu=" << zu << endl;
-      //cout << "xv=" << xv << "yv=" << yv << "zv=" << zv << endl;
+      //std::cout << "xu=" << xu << "yu=" << yu << "zu=" << zu << std::endl;
+      //std::cout << "xv=" << xv << "yv=" << yv << "zv=" << zv << std::endl;
     }
   else if (in_inter==1) // u=s, v=t
     {
@@ -529,8 +534,8 @@ double eles_tets::compute_inter_detjac_inters_cubpts(int in_inter,array<double> 
   temp2 = xu*yv-yu*xv;
 
   output = sqrt(temp0*temp0+temp1*temp1+temp2*temp2);
-  //cout << "temp0=" << temp0 << "temp1" << temp1 << "temp2" << temp2 << endl;
-  //cout << "in_inter=" << in_inter << "output=" << output << endl;
+  //std::cout << "temp0=" << temp0 << "temp1" << temp1 << "temp2" << temp2 << std::endl;
+  //std::cout << "in_inter=" << in_inter << "output=" << output << std::endl;
 
 
   return output;
@@ -659,7 +664,7 @@ void eles_tets::compute_filter_upts(void)
     }
   else if(run_input.filter_type==1) // Discrete Gaussian filter
     {
-      if (rank==0) cout<<"Building discrete Gaussian filter"<<endl;
+      if (rank==0) std::cout<<"Building discrete Gaussian filter"<<std::endl;
 
       if(N != n_cubpts_per_ele)
         {
@@ -668,7 +673,7 @@ void eles_tets::compute_filter_upts(void)
     }
   else if(run_input.filter_type==2) // Modal coefficient filter
     {
-      if (rank==0) cout<<"Building modal filter"<<endl;
+      if (rank==0) std::cout<<"Building modal filter"<<std::endl;
 
       // Compute modal filter
       compute_modal_filter_tet(filter_upts, vandermonde, inv_vandermonde, N, order);
@@ -676,7 +681,7 @@ void eles_tets::compute_filter_upts(void)
     }
   else // Simple average for low order
     {
-      if (rank==0) cout<<"Building average filter"<<endl;
+      if (rank==0) std::cout<<"Building average filter"<<std::endl;
       sum=0;
       for(i=0;i<N;i++)
         {
@@ -746,7 +751,7 @@ void eles_tets::set_vandermonde_restart()
   inv_vandermonde_rest = inv_array(vandermonde);
 }
 
-int eles_tets::read_restart_info(ifstream& restart_file)
+int eles_tets::read_restart_info(std::ifstream& restart_file)
 {
   string str;
   // Move to triangle element
@@ -779,22 +784,22 @@ int eles_tets::read_restart_info(ifstream& restart_file)
 }
 
 // write restart info
-void eles_tets::write_restart_info(ofstream& restart_file)
+void eles_tets::write_restart_info(std::ofstream& restart_file)
 {
-  restart_file << "TETS" << endl;
+  restart_file << "TETS" << std::endl;
 
-  restart_file << "Order" << endl;
-  restart_file << order << endl;
+  restart_file << "Order" << std::endl;
+  restart_file << order << std::endl;
 
-  restart_file << "Number of solution points per element" << endl;
-  restart_file << n_upts_per_ele << endl;
+  restart_file << "Number of solution points per element" << std::endl;
+  restart_file << n_upts_per_ele << std::endl;
 
-  restart_file << "Location of solution points in tetrahedral elements" << endl;
+  restart_file << "Location of solution points in tetrahedral elements" << std::endl;
   for (int i=0;i<n_upts_per_ele;i++) {
       for (int j=0;j<n_dims;j++) {
           restart_file << loc_upts(j,i) << " ";
         }
-      restart_file << endl;
+      restart_file << std::endl;
     }
 
 }
@@ -897,8 +902,8 @@ double eles_tets::eval_nodal_s_basis(int in_index, array<double> in_loc, int in_
     }
   else
     {
-      cout << "Shape order not implemented yet, exiting" << endl;
-      cout << "n_spt = " << in_n_spts << endl;
+      std::cout << "Shape order not implemented yet, exiting" << std::endl;
+      std::cout << "n_spt = " << in_n_spts << std::endl;
       exit(1);
     }
   return nodal_s_basis;
@@ -962,8 +967,8 @@ void eles_tets::eval_d_nodal_s_basis(array<double> &d_nodal_s_basis, array<doubl
     }
   else
     {
-      cout << "Shape order not implemented yet, exiting" << endl;
-      cout << "n_spt = " << in_n_spts << endl;
+      std::cout << "Shape order not implemented yet, exiting" << std::endl;
+      std::cout << "n_spt = " << in_n_spts << std::endl;
       exit(1);
     }
 
@@ -980,15 +985,15 @@ void eles_tets::fill_opp_3(array<double>& opp_3)
 
   get_opp_3_dg_tet(opp_3_dg);
 
-  //cout << "opp_3_dg" << endl;
+  //std::cout << "opp_3_dg" << std::endl;
   //opp_3_dg.print();
-  //cout << endl;
+  //std::cout << std::endl;
 
   m_temp = mult_arrays(Filt,opp_3_dg);
 
-  //cout << "opp_3_vcjh" << endl;
+  //std::cout << "opp_3_vcjh" << std::endl;
   //m_temp.print();
-  //cout << endl;
+  //std::cout << std::endl;
   opp_3 = array<double>(m_temp);
 }
 
@@ -1217,7 +1222,7 @@ void eles_tets::compute_filt_matrix_tet(array<double>& Filt, int vcjh_scheme_tet
   else
     FatalError("VCJH tetrahedral scheme not recognized");
 
-  cout << "c_tet " << c_tet << endl;
+  std::cout << "c_tet " << c_tet << std::endl;
 
   run_input.c_tet = c_tet;
 
@@ -1235,26 +1240,26 @@ void eles_tets::compute_filt_matrix_tet(array<double>& Filt, int vcjh_scheme_tet
   Ds = mult_arrays(temps,inv_vandermonde);
   Dt = mult_arrays(tempt,inv_vandermonde);
 
-  //cout << "Dr nodal" << endl;
+  //std::cout << "Dr nodal" << std::endl;
   //Dr.print();
-  //cout << endl;
-  //cout << "Dr dubiner" << endl;
+  //std::cout << std::endl;
+  //std::cout << "Dr dubiner" << std::endl;
   //(Dr*vandermonde).print();
-  //cout << endl;
+  //std::cout << std::endl;
 
-  //cout << "Ds nodal" << endl;
+  //std::cout << "Ds nodal" << std::endl;
   //Ds.print();
-  //cout << endl;
-  //cout << "Ds dubiner" << endl;
+  //std::cout << std::endl;
+  //std::cout << "Ds dubiner" << std::endl;
   //(Ds*vandermonde).print();
-  //cout << endl;
+  //std::cout << std::endl;
 
-  //cout << "Dt nodal" << endl;
+  //std::cout << "Dt nodal" << std::endl;
   //Dt.print();
-  //cout << endl;
-  //cout << "Dt dubiner" << endl;
+  //std::cout << std::endl;
+  //std::cout << "Dt dubiner" << std::endl;
   //(Dt*vandermonde).print();
-  //cout << endl;
+  //std::cout << std::endl;
 
   //Create identity matrix
   zero_array(Identity);
@@ -1267,7 +1272,7 @@ void eles_tets::compute_filt_matrix_tet(array<double>& Filt, int vcjh_scheme_tet
   for(int v=1; v<=(order+1); v++) {
       for(int w=1; w<=v; w++) {
           c_coeff(indx) = (1./n_upts_per_ele)*(factorial(order)/( factorial(v-1)*factorial(order-(v-1)) ))*(factorial(v-1)/(factorial(w-1)*factorial((v-1)-(w-1))));
-          //cout << "v=" << v << " w=" << w << " indx=" << indx << " coeff= " << c_coeff(indx) << endl;
+          //std::cout << "v=" << v << " w=" << w << " indx=" << indx << " coeff= " << c_coeff(indx) << std::endl;
           indx++;
         }
     }
@@ -1296,13 +1301,13 @@ void eles_tets::compute_filt_matrix_tet(array<double>& Filt, int vcjh_scheme_tet
           D_high_order_trans = transpose_array(D_high_order(indx));
           D_T_D(indx) = mult_arrays(D_high_order_trans,D_high_order(indx));
 
-          //cout << "indx=" << indx << endl;
+          //std::cout << "indx=" << indx << std::endl;
           //(D_high_order(indx)*vandermonde).print();
 
-          //cout << endl;
+          //std::cout << std::endl;
           //mtemp_2 = vandermonde.get_trans()*D_T_D(indx)*vandermonde;
           //mtemp_2.print();
-          //cout << endl;
+          //std::cout << std::endl;
 
           // Scale by c_coeff
           for (int i=0;i<n_upts_per_ele;i++) {
@@ -1331,11 +1336,11 @@ void eles_tets::compute_filt_matrix_tet(array<double>& Filt, int vcjh_scheme_tet
   Filt_dubiner = mult_arrays(inv_vandermonde,Filt);
   Filt_dubiner = mult_arrays(Filt_dubiner,vandermonde);
 
-  //cout << "Filt" << endl;
+  //std::cout << "Filt" << std::endl;
   //Filt.print();
-  //cout << endl;
+  //std::cout << std::endl;
 
-  //cout << "Filt_dubiner" << endl;
+  //std::cout << "Filt_dubiner" << std::endl;
   //Filt_dubiner.print();
 
 
@@ -1386,7 +1391,7 @@ void eles_tets::compute_filt_matrix_tet(array<double>& Filt, int vcjh_scheme_tet
   else
     FatalError("VCJH triangular scheme not recognized");
 
-  cout << "Filtering fraction=" << frac << endl;
+  std::cout << "Filtering fraction=" << frac << std::endl;
 
   for (int j=0;j<n_upts_per_ele;j++) {
     for (int k=0;k<n_upts_per_ele;k++) {
@@ -1404,10 +1409,10 @@ void eles_tets::compute_filt_matrix_tet(array<double>& Filt, int vcjh_scheme_tet
 
   Filt = vandermonde_tri*Filt_dubiner*inv_vandermonde_tri;
 
-  //cout << "Filt_dubiner_diag" << endl;
+  //std::cout << "Filt_dubiner_diag" << std::endl;
   //Filt_dubiner.print();
 
-  cout << "Filt_diag" << endl;
+  std::cout << "Filt_diag" << std::endl;
   Filt.print();
   */
 

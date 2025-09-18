@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file cuda_kernels.cu
  * \brief _____________________________
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
@@ -185,7 +185,7 @@ __device__ void set_inv_boundary_conditions_kernel(int bdy_type, double* u_l, do
       }
     }
 
-    // Subsonic outflow simple (fixed pressure) //CONSIDER DELETING
+    // Subsonic outflow simple (std::fixed pressure) //CONSIDER DELETING
     else if(bdy_type == 2)
     {
       // extrapolate density and velocity
@@ -405,7 +405,7 @@ __device__ void set_inv_boundary_conditions_kernel(int bdy_type, double* u_l, do
       e_r = e_l;
     }
 
-    // Isothermal, no-slip wall (fixed)
+    // Isothermal, no-slip wall (std::fixed)
     else if(bdy_type == 11)
     {
       // Set state for the right side
@@ -437,7 +437,7 @@ __device__ void set_inv_boundary_conditions_kernel(int bdy_type, double* u_l, do
       }
     }
 
-    // Adiabatic, no-slip wall (fixed)
+    // Adiabatic, no-slip wall (std::fixed)
     else if(bdy_type == 12)
     {
       // extrapolate density
@@ -1071,7 +1071,7 @@ __device__ void rotation_matrix_kernel(double* norm, double* mrot)
 {
   double nn;
 
-  //cout << "norm "<< norm(0) << ", " << norm(1) << endl;
+  //std::cout << "norm "<< norm(0) << ", " << norm(1) << std::endl;
 
   if(n_dims==2) {
     if(abs(norm[1]) > 0.7) {
@@ -5456,7 +5456,7 @@ void calc_similarity_model_kernel_wrapper(int flag, int n_fields, int n_upts_per
 
   /*! Calculate product terms uu, ue */
   if (flag==0) {
-    // fixed n_fields at 4 for 2d and 5 for 3d
+    // std::fixed n_fields at 4 for 2d and 5 for 3d
     if(n_dims==2) {
       calc_similarity_terms_kernel<4> <<< n_blocks,block_size >>> (n_upts_per_ele, n_eles, n_dims, disu_upts_ptr, uu_ptr, ue_ptr);
     }
@@ -5466,7 +5466,7 @@ void calc_similarity_model_kernel_wrapper(int flag, int n_fields, int n_upts_per
   }
   /*! Calculate Leonard tensors Lu, Le */
   else if (flag==1) {
-    // fixed n_fields at 4 for 2d and 5 for 3d
+    // std::fixed n_fields at 4 for 2d and 5 for 3d
     if(n_dims==2) {
       calc_Leonard_tensors_kernel<4> <<< n_blocks,block_size >>> (n_upts_per_ele, n_eles, n_dims, disuf_upts_ptr, Lu_ptr, Le_ptr);
     }
@@ -5618,7 +5618,7 @@ void set_transforms_dynamic_upts_kernel_wrapper(int n_upts_per_ele, int n_eles, 
   }
 
   if (err)
-    cout << "ERROR: Negative Jacobian found at solution point!" << endl;
+    std::cout << "ERROR: Negative Jacobian found at solution point!" << std::endl;
 
   check_cuda_error("After",__FILE__, __LINE__);
 }
@@ -5641,7 +5641,7 @@ void set_transforms_dynamic_fpts_kernel_wrapper(int n_fpts_per_ele, int n_eles, 
   }
 
   /*if (*err)
-    cout << "ERROR: Negative Jacobian found at flux point!" << endl;*/
+    std::cout << "ERROR: Negative Jacobian found at flux point!" << std::endl;*/
 
   check_cuda_error("After",__FILE__, __LINE__);
 }

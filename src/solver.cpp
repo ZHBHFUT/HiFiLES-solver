@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file solver.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -22,10 +22,6 @@
  * You should have received a copy of the GNU General Public License
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include <iostream>
-#include <sstream>
-#include <cmath>
 
 #include "../include/global.h"
 #include "../include/array.h"
@@ -51,7 +47,11 @@
 #include "../include/util.h"
 #endif
 
-using namespace std;
+#include <cmath>
+#include <iostream>
+#include <sstream>
+
+//using namespace std;
 
 #define MAX_V_PER_F 4
 #define MAX_F_PER_C 6
@@ -176,8 +176,8 @@ void CalcResidual(int in_file_num, int in_rk_stage, struct solution* FlowSol) {
 
   /*! If using LES, compute the SGS flux at flux points. */
   if (run_input.LES) {
-	  for(i=0; i<FlowSol->n_ele_types; i++)
-			FlowSol->mesh_eles(i)->evaluate_sgsFlux();
+      for(i=0; i<FlowSol->n_ele_types; i++)
+            FlowSol->mesh_eles(i)->evaluate_sgsFlux();
   }
 
   /*! For viscous or inviscid, compute the normal discontinuous flux at flux points. */
@@ -251,7 +251,7 @@ double* get_norm_tconf_fpts_ptr(int in_ele_type, int in_ele, int in_field, int i
 
 double* get_sgsf_fpts_ptr(int in_ele_type, int in_ele, int in_local_inter, int in_field, int in_dim, int in_fpt, struct solution* FlowSol)
 {
-	return FlowSol->mesh_eles(in_ele_type)->get_sgsf_fpts_ptr(in_fpt,in_local_inter,in_field,in_dim,in_ele);
+    return FlowSol->mesh_eles(in_ele_type)->get_sgsf_fpts_ptr(in_fpt,in_local_inter,in_field,in_dim,in_ele);
 }
 
 // get pointer to determinant of jacobian at a flux point
@@ -352,7 +352,7 @@ double* get_grid_vel_fpts_ptr(int in_ele_type, int in_ele, int in_local_inter, i
 void InitSolution(struct solution* FlowSol)
 {
   // set initial conditions
-  if (FlowSol->rank==0) cout << "Setting initial conditions... " << endl;
+  if (FlowSol->rank==0) std::cout << "Setting initial conditions... " << std::endl;
 
   if (run_input.restart_flag==0) {
       for(int i=0;i<FlowSol->n_ele_types;i++) {
@@ -392,7 +392,7 @@ void read_restart(int in_file_num, int in_n_files, struct solution* FlowSol)
 
   char file_name_s[50];
   char *file_name;
-  ifstream restart_file;
+  std::ifstream restart_file;
   restart_file.precision(15);
 
   // Open the restart files and read info
@@ -423,7 +423,7 @@ void read_restart(int in_file_num, int in_n_files, struct solution* FlowSol)
 
   for (int j=0;j<in_n_files;j++)
     {
-      //cout <<  "Reading restart file " << j << endl;
+      //std::cout <<  "Reading restart file " << j << std::endl;
       sprintf(file_name_s,"Rest_%.09d_p%.04d.dat",in_file_num,j);
       file_name = &file_name_s[0];
       restart_file.open(file_name);
@@ -440,6 +440,6 @@ void read_restart(int in_file_num, int in_n_files, struct solution* FlowSol)
         }
       restart_file.close();
     }
-  cout << "Rank=" << FlowSol->rank << " Done reading restart files" << endl;
+  std::cout << "Rank=" << FlowSol->rank << " Done reading restart files" << std::endl;
 }
 

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file cubature_1d.h
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -25,8 +25,9 @@
 
 #pragma once
 
-#include <string>
 #include "array.h"
+
+#include <string>
 
 class cubature_1d
 {
@@ -75,5 +76,5 @@ public:
   array<double> weights;
   
   // cubature data file
-  ifstream datfile;
+  std::ifstream datfile;
 };

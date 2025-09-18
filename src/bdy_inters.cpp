@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file bdy_inters.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,13 +23,10 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <cmath>
-
+#include "../include/bdy_inters.h"
 #include "../include/global.h"
 #include "../include/array.h"
 #include "../include/inters.h"
-#include "../include/bdy_inters.h"
 #include "../include/geometry.h"
 #include "../include/solver.h"
 #include "../include/output.h"
@@ -44,7 +41,12 @@
 #include "mpi.h"
 #endif
 
-using namespace std;
+#include <cmath>
+#include <iostream>
+
+//using namespace std;
+
+constexpr int max_dims = 3;
 
 // #### constructors ####
 
@@ -232,7 +234,7 @@ void bdy_inters::mv_all_cpu_gpu(void)
     }
   //detjac_fpts_l.mv_cpu_gpu();
 
-	sgsf_fpts_l.mv_cpu_gpu();
+    sgsf_fpts_l.mv_cpu_gpu();
 
   boundary_type.mv_cpu_gpu();
   bdy_params.mv_cpu_gpu();
@@ -391,7 +393,8 @@ void bdy_inters::evaluate_boundaryConditions_invFlux(double time_bound) {
 void bdy_inters::set_inv_boundary_conditions(int bdy_type, double* u_l, double* u_r, double* v_g, double *norm, double *loc, double *bdy_params, int n_dims, int n_fields, double gamma, double R_ref, double time_bound, int equation)
 {
   double rho_l, rho_r;
-  double v_l[n_dims], v_r[n_dims];
+  //double v_l[n_dims], v_r[n_dims];
+  double v_l[max_dims], v_r[max_dims];
   double e_l, e_r;
   double p_l, p_r;
   double T_r;
@@ -444,7 +447,7 @@ void bdy_inters::set_inv_boundary_conditions(int bdy_type, double* u_l, double* 
           }
         }
 
-      // Subsonic outflow simple (fixed pressure) //CONSIDER DELETING
+      // Subsonic outflow simple (std::fixed pressure) //CONSIDER DELETING
       else if(bdy_type == 2)
         {
           // extrapolate density and velocity
@@ -664,7 +667,7 @@ void bdy_inters::set_inv_boundary_conditions(int bdy_type, double* u_l, double* 
           e_r = e_l;
         }
 
-      // Isothermal, no-slip wall (fixed)
+      // Isothermal, no-slip wall (std::fixed)
       else if(bdy_type == 11)
         {
           // Set state for the right side
@@ -696,7 +699,7 @@ void bdy_inters::set_inv_boundary_conditions(int bdy_type, double* u_l, double* 
           }
         }
 
-      // Adiabatic, no-slip wall (fixed)
+      // Adiabatic, no-slip wall (std::fixed)
       else if(bdy_type == 12)
         {
           // extrapolate density
@@ -1056,7 +1059,8 @@ void bdy_inters::set_vis_boundary_conditions(int bdy_type, double* u_l, double* 
   double inte;
   double p_l, p_r;
 
-  double grad_vel[n_dims*n_dims];
+  //double grad_vel[n_dims*n_dims];
+  double grad_vel[max_dims * max_dims];
 
 
   // Adiabatic wall

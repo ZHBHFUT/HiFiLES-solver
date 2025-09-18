@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file HiFiLES.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,9 +23,6 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <fstream>
-
 #include "../include/global.h"
 #include "../include/array.h"
 #include "../include/funcs.h"
@@ -44,7 +41,10 @@
 #include "util.h"
 #endif
 
-using namespace std;
+#include <iostream>
+#include <fstream>
+
+//using namespace std;
 
 int main(int argc, char *argv[]) {
   
@@ -52,15 +52,15 @@ int main(int argc, char *argv[]) {
   int i, j;                           /*!< Loop iterators */
   int i_steps = 0;                    /*!< Iteration index */
   int RKSteps;                        /*!< Number of RK steps */
-  ifstream run_input_file;            /*!< Config input file */
+  std::ifstream run_input_file;            /*!< Config input file */
   clock_t init_time, final_time;                /*!< To control the time */
   struct solution FlowSol;            /*!< Main structure with the flow solution and geometry */
-  ofstream write_hist;                /*!< Output files (forces, statistics, and history) */
+  std::ofstream write_hist;                /*!< Output files (forces, statistics, and history) */
   mesh Mesh;                          /*!< Store mesh details & perform mesh motion */
   
   /*! Check the command line input. */
   
-  if (argc < 2) { cout << "ERROR: No input file specified ... " << endl; return(0); }
+  if (argc < 2) { std::cout << "ERROR: No input file specified ... " << std::endl; return(0); }
   
   /*! Initialize MPI. */
   
@@ -72,14 +72,14 @@ int main(int argc, char *argv[]) {
 #endif
   
   if (rank == 0) {
-    cout << " __    __   __   _______  __          __       _______     _______." << endl;
-    cout << "|  |  |  | |  | |   ____||  |        |  |     |   ____|   /       |" << endl;
-    cout << "|  |__|  | |  | |  |__   |  |  _____ |  |     |  |__     |   (----`" << endl;
-    cout << "|   __   | |  | |   __|  |  | |____| |  |     |   __|     \\   \\" << endl;
-    cout << "|  |  |  | |  | |  |     |  |        |  `----.|  |____.----)   |" << endl;
-    cout << "|__|  |__| |__| |__|     |__|        |_______||_______|_______/" << endl;
-    cout << "                                              " << endl;
-    cout << "Aerospace Computing Laboratory (Stanford University) " << endl;
+    std::cout << " __    __   __   _______  __          __       _______     _______." << std::endl;
+    std::cout << "|  |  |  | |  | |   ____||  |        |  |     |   ____|   /       |" << std::endl;
+    std::cout << "|  |__|  | |  | |  |__   |  |  _____ |  |     |  |__     |   (----`" << std::endl;
+    std::cout << "|   __   | |  | |   __|  |  | |____| |  |     |   __|     \\   \\" << std::endl;
+    std::cout << "|  |  |  | |  | |  |     |  |        |  `----.|  |____.----)   |" << std::endl;
+    std::cout << "|__|  |__| |__| |__|     |__|        |_______||_______|_______/" << std::endl;
+    std::cout << "                                              " << std::endl;
+    std::cout << "Aerospace Computing Laboratory (Stanford University) " << std::endl;
   }
 
   /////////////////////////////////////////////////
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
   else if (FlowSol.write_type == 1) write_tec(FlowSol.ini_iter+i_steps, &FlowSol);
   else FatalError("ERROR: Trying to write unrecognized file format ... ");
   
-  if (FlowSol.rank == 0) cout << endl;
+  if (FlowSol.rank == 0) std::cout << std::endl;
   
   /////////////////////////////////////////////////
   /// Flow solver
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
       
       HistoryOutput(FlowSol.ini_iter+i_steps, init_time, &write_hist, &FlowSol);
       
-      if (FlowSol.rank == 0) cout << endl;
+      if (FlowSol.rank == 0) std::cout << std::endl;
     }
     
     /*! Dump Paraview or Tecplot file. */

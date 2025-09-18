@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file source.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -23,13 +23,13 @@
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
-
 #include "../include/global.h"
 #include "../include/array.h"
 #include "../include/source.h"
 
-using namespace std;
+#include <cmath>
+
+//using namespace std;
 
 // calculate source term for Spalart-Allmaras turbulence model in 2D
 void calc_source_SA_2d(array<double>& in_u, array<double>& in_grad_u, double& d, double& out_source)
@@ -110,5 +110,5 @@ void calc_source_SA_2d(array<double>& in_u, array<double>& in_grad_u, double& d,
 // NOTE:: I STILL NEED TO WRITE THIS
 void calc_source_SA_3d(array<double>& in_u, array<double>& in_grad_u, double& d, double& out_source)
 {
-  cout << "3D source term not implemented yet" << endl;
+  std::cout << "3D source term not implemented yet" << std::endl;
 }

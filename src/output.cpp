@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file output.cpp
  * \author - Original code: SD++ developed by Patrice Castonguay, Antony Jameson,
  *                          Peter Vincent, David Williams (alphabetical by surname).
@@ -22,15 +22,6 @@
  * You should have received a copy of the GNU General Public License
  * along with HiFiLES.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include <iostream>
-#include <sstream>
-#include <cmath>
-
-// Used for making sub-directories
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include "../include/global.h"
 #include "../include/array.h"
@@ -56,7 +47,20 @@
 #include "../include/util.h"
 #endif
 
-using namespace std;
+#include <iostream>
+#include <sstream>
+#include <cmath>
+
+ // Used for making sub-directories
+#include <sys/types.h>
+#include <sys/stat.h>
+#ifdef _MSC_VER
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
+
+//using namespace std;
 
 #define MAX_V_PER_F 4
 #define MAX_F_PER_C 6
@@ -94,7 +98,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
   char *file_name;
   string fields("");
 
-  ofstream write_tec;
+  std::ofstream write_tec;
   write_tec.precision(15);
 
   // number of additional diagnostic fields
@@ -106,17 +110,17 @@ void write_tec(int in_file_num, struct solution* FlowSol)
 #ifdef _MPI
   MPI_Barrier(MPI_COMM_WORLD);
   sprintf(file_name_s,"%s_%.09d_p%.04d.plt",run_input.data_file_name.c_str(),in_file_num,FlowSol->rank);
-  if (FlowSol->rank==0) cout << "Writing Tecplot file number " << in_file_num << " ...." << endl;
+  if (FlowSol->rank==0) std::cout << "Writing Tecplot file number " << in_file_num << " ...." << std::endl;
 #else
   sprintf(file_name_s,"%s_%.09d_p%.04d.plt",run_input.data_file_name.c_str(),in_file_num,0);
-  cout << "Writing Tecplot file number " << in_file_num << " on rank " << FlowSol->rank << endl;
+  std::cout << "Writing Tecplot file number " << in_file_num << " on rank " << FlowSol->rank << std::endl;
 #endif
 
   file_name = &file_name_s[0];
   write_tec.open(file_name);
 
   // write header
-  write_tec << "Title = \"HiFiLES Solution\"" << endl;
+  write_tec << "Title = \"HiFiLES Solution\"" << std::endl;
 
   // string of field names
   if (run_input.equation==0)
@@ -131,7 +135,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
         }
       else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
     }
   else if (run_input.equation==1)
@@ -146,7 +150,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
         }
       else
         {
-          cout << "ERROR: Invalid number of dimensions ... " << endl;
+          std::cout << "ERROR: Invalid number of dimensions ... " << std::endl;
         }
     }
 
@@ -176,7 +180,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
     }
 
   // write field names to file
-  write_tec << fields << endl;
+  write_tec << fields << std::endl;
 
   int time_iter = 0;
 
@@ -204,23 +208,23 @@ void write_tec(int in_file_num, struct solution* FlowSol)
           // write element specific header
           if(FlowSol->mesh_eles(i)->get_ele_type()==0) // tri
             {
-              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FETRIANGLE" << endl;
+              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FETRIANGLE" << std::endl;
             }
           else if(FlowSol->mesh_eles(i)->get_ele_type()==1) // quad
             {
-              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FEQUADRILATERAL" << endl;
+              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FEQUADRILATERAL" << std::endl;
             }
           else if (FlowSol->mesh_eles(i)->get_ele_type()==2) // tet
             {
-              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FETETRAHEDRON" << endl;
+              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FETETRAHEDRON" << std::endl;
             }
           else if (FlowSol->mesh_eles(i)->get_ele_type()==3) // prisms
             {
-              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FEBRICK" << endl;
+              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FEBRICK" << std::endl;
             }
           else if(FlowSol->mesh_eles(i)->get_ele_type()==4) // hexa
             {
-              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FEBRICK" << endl;
+              write_tec << "ZONE N = " << num_pts << ", E = " << num_elements << ", DATAPACKING = POINT, ZONETYPE = FEBRICK" << std::endl;
             }
           else
             {
@@ -229,7 +233,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
 
           if(time_iter == 0)
             {
-              write_tec <<"SolutionTime=" << FlowSol->time << endl;
+              write_tec <<"SolutionTime=" << FlowSol->time << std::endl;
               time_iter = 1;
             }
 
@@ -302,7 +306,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                         }
                     }
 
-                  write_tec << endl;
+                  write_tec << std::endl;
                 }
             }
 
@@ -323,7 +327,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                           vertex_1+=j*(p_res*(p_res+1)/2);
                           vertex_2+=j*(p_res*(p_res+1)/2);
 
-                          write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << endl;
+                          write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << std::endl;
                         }
                     }
 
@@ -339,7 +343,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                           vertex_1+=j*(p_res*(p_res+1)/2);
                           vertex_2+=j*(p_res*(p_res+1)/2);
 
-                          write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << endl;
+                          write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << std::endl;
                         }
                     }
                 }
@@ -363,7 +367,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                           vertex_2 += j*p_res*p_res;
                           vertex_3 += j*p_res*p_res;
 
-                          write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1 << " " <<  vertex_3+1  << endl;
+                          write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1 << " " <<  vertex_3+1  << std::endl;
                         }
                     }
                 }
@@ -395,7 +399,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                               vertex_2+=m*temp;
                               vertex_3+=m*temp;
 
-                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_3+1 << endl;
+                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_3+1 << std::endl;
 
                             }
                         }
@@ -423,10 +427,10 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                               vertex_4+=m*temp;
                               vertex_5+=m*temp;
 
-                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_5+1 << endl;
-                              write_tec << vertex_0+1  << " " <<  vertex_2+1  << " " <<  vertex_4+1  << " " << vertex_5+1 << endl;
-                              write_tec << vertex_2+1  << " " <<  vertex_3+1  << " " <<  vertex_4+1  << " " << vertex_5+1 << endl;
-                              write_tec << vertex_1+1  << " " <<  vertex_2+1  << " " <<  vertex_3+1  << " " << vertex_5+1 << endl;
+                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_5+1 << std::endl;
+                              write_tec << vertex_0+1  << " " <<  vertex_2+1  << " " <<  vertex_4+1  << " " << vertex_5+1 << std::endl;
+                              write_tec << vertex_2+1  << " " <<  vertex_3+1  << " " <<  vertex_4+1  << " " << vertex_5+1 << std::endl;
+                              write_tec << vertex_1+1  << " " <<  vertex_2+1  << " " <<  vertex_3+1  << " " << vertex_5+1 << std::endl;
                             }
                         }
                     }
@@ -448,7 +452,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                               vertex_2+=m*temp;
                               vertex_3+=m*temp;
 
-                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_3+1 << endl;
+                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_3+1 << std::endl;
                             }
                         }
                     }
@@ -483,7 +487,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                               vertex_4+=m*(p_res*(p_res+1)/2*p_res);
                               vertex_5+=m*(p_res*(p_res+1)/2*p_res);
 
-                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_2+1 << " " << vertex_3+1 << " " << vertex_4+1 << " " << vertex_5+1 << " " << vertex_5+1 << endl;
+                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_2+1 << " " << vertex_3+1 << " " << vertex_4+1 << " " << vertex_5+1 << " " << vertex_5+1 << std::endl;
                             }
                         }
                     }
@@ -509,7 +513,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                               vertex_4+=m*(p_res*(p_res+1)/2*p_res);
                               vertex_5+=m*(p_res*(p_res+1)/2*p_res);
 
-                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_2+1 << " " << vertex_3+1 << " " << vertex_4+1 << " " << vertex_5+1 << " " << vertex_5+1 << endl;
+                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1  << " " << vertex_2+1 << " " << vertex_3+1 << " " << vertex_4+1 << " " << vertex_5+1 << " " << vertex_5+1 << std::endl;
                             }
                         }
                     }
@@ -544,7 +548,7 @@ void write_tec(int in_file_num, struct solution* FlowSol)
                               vertex_6 += j*p_res*p_res*p_res;
                               vertex_7 += j*p_res*p_res*p_res;
 
-                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1 << " " <<  vertex_3+1  << " " << vertex_4+1 << " " << vertex_5+1 << " " << vertex_6+1 << " " << vertex_7+1 <<endl;
+                              write_tec << vertex_0+1  << " " <<  vertex_1+1  << " " <<  vertex_2+1 << " " <<  vertex_3+1  << " " << vertex_4+1 << " " << vertex_5+1 << " " << vertex_6+1 << " " << vertex_7+1 <<std::endl;
                             }
                         }
                     }
@@ -561,9 +565,9 @@ void write_tec(int in_file_num, struct solution* FlowSol)
 
 #ifdef _MPI
   MPI_Barrier(MPI_COMM_WORLD);
-  if (FlowSol->rank==0) cout << "Done writing Tecplot file number " << in_file_num << " ...." << endl;
+  if (FlowSol->rank==0) std::cout << "Done writing Tecplot file number " << in_file_num << " ...." << std::endl;
 #else
-  cout << "Done writing Tecplot file number " << in_file_num << " ...." << endl;
+  std::cout << "Done writing Tecplot file number " << in_file_num << " ...." << std::endl;
 #endif
 
 }
@@ -638,9 +642,9 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
   char *dumpnum;
 
   /*! Output files */
-  ofstream write_vtu;
+  std::ofstream write_vtu;
   write_vtu.precision(15);
-  ofstream write_pvtu;
+  std::ofstream write_pvtu;
   write_pvtu.precision(15);
 
   /*! no. of optional diagnostic fields */
@@ -680,7 +684,11 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
   if (my_rank == 0) {
       struct stat st = {0};
       if (stat(dumpnum, &st) == -1) {
+#ifdef _MSC_VER
+          _mkdir(dumpnum);
+#else
           mkdir(dumpnum, 0755);
+#endif
         }
       /*! Delete old .vtu files from directory */
       //remove(strcat(dumpnum,"/*.vtu"));
@@ -688,58 +696,58 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
 
   /*! Master node writes the .pvtu file */
   if (my_rank == 0) {
-      cout << "Writing Paraview file " << dumpnum << " ...." << endl;
+      std::cout << "Writing Paraview file " << dumpnum << " ...." << std::endl;
 
       write_pvtu.open(pvtu);
-      write_pvtu << "<?xml version=\"1.0\" ?>" << endl;
-      write_pvtu << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\" compressor=\"vtkZLibDataCompressor\">" << endl;
-      write_pvtu << "	<PUnstructuredGrid GhostLevel=\"1\">" << endl;
+      write_pvtu << "<?xml version=\"1.0\" ?>" << std::endl;
+      write_pvtu << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\" compressor=\"vtkZLibDataCompressor\">" << std::endl;
+      write_pvtu << "	<PUnstructuredGrid GhostLevel=\"1\">" << std::endl;
 
       /*! Write point data */
-      write_pvtu << "		<PPointData Scalars=\"Density\" Vectors=\"Velocity\">" << endl;
-      write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Density\" />" << endl;
-      write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Velocity\" NumberOfComponents=\"3\" />" << endl;
-      write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Energy\" />" << endl;
+      write_pvtu << "		<PPointData Scalars=\"Density\" Vectors=\"Velocity\">" << std::endl;
+      write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Density\" />" << std::endl;
+      write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Velocity\" NumberOfComponents=\"3\" />" << std::endl;
+      write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Energy\" />" << std::endl;
 
       /*! write out modified turbulent viscosity */
       if (run_input.turb_model==1) {
-        write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Mu_Tilde\" />" << endl;
+        write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Mu_Tilde\" />" << std::endl;
       }
 
       // Optional time-averaged diagnostic fields
       for(m=0;m<n_average_fields;m++)
         {
-          write_pvtu << "			<PDataArray type=\"Float32\" Name=\"" << run_input.average_fields(m) << "\" />" << endl;
+          write_pvtu << "			<PDataArray type=\"Float32\" Name=\"" << run_input.average_fields(m) << "\" />" << std::endl;
         }
 
       // Optional diagnostic fields
       for(m=0;m<n_diag_fields;m++)
         {
-          write_pvtu << "			<PDataArray type=\"Float32\" Name=\"" << run_input.diagnostic_fields(m) << "\" />" << endl;
+          write_pvtu << "			<PDataArray type=\"Float32\" Name=\"" << run_input.diagnostic_fields(m) << "\" />" << std::endl;
         }
 
-      write_pvtu << "		</PPointData>" << endl;
+      write_pvtu << "		</PPointData>" << std::endl;
 
       /*! Write points */
-      write_pvtu << "		<PPoints>" << endl;
-      write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Points\" NumberOfComponents=\"3\" />" << endl;
-      write_pvtu << "		</PPoints>" << endl;
+      write_pvtu << "		<PPoints>" << std::endl;
+      write_pvtu << "			<PDataArray type=\"Float32\" Name=\"Points\" NumberOfComponents=\"3\" />" << std::endl;
+      write_pvtu << "		</PPoints>" << std::endl;
 
       /*! Write names of source .vtu files to include */
       for (i=0;i<n_proc;++i) {
-          write_pvtu << "		<Piece Source=\"" << dumpnum << "/" << dumpnum <<"_" << i << ".vtu" << "\" />" << endl;
+          write_pvtu << "		<Piece Source=\"" << dumpnum << "/" << dumpnum <<"_" << i << ".vtu" << "\" />" << std::endl;
         }
 
       /*! Write footer */
-      write_pvtu << "	</PUnstructuredGrid>" << endl;
-      write_pvtu << "</VTKFile>" << endl;
+      write_pvtu << "	</PUnstructuredGrid>" << std::endl;
+      write_pvtu << "</VTKFile>" << std::endl;
       write_pvtu.close();
     }
 
 #else
 
   /*! In serial, don't write a .pvtu file. */
-  cout << "Writing Paraview file " << dumpnum << " ... " << flush;
+  std::cout << "Writing Paraview file " << dumpnum << " ... " << std::flush;
 
 #endif
 
@@ -753,9 +761,9 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
   /*! Each process writes its own .vtu file */
   write_vtu.open(vtu);
   /*! File header */
-  write_vtu << "<?xml version=\"1.0\" ?>" << endl;
-  write_vtu << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\" compressor=\"vtkZLibDataCompressor\">" << endl;
-  write_vtu << "	<UnstructuredGrid>" << endl;
+  write_vtu << "<?xml version=\"1.0\" ?>" << std::endl;
+  write_vtu << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\" compressor=\"vtkZLibDataCompressor\">" << std::endl;
+  write_vtu << "	<UnstructuredGrid>" << std::endl;
 
   /*! Loop over element types */
   for(i=0;i<FlowSol->n_ele_types;i++)
@@ -819,7 +827,7 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
           /*! Loop over individual elements and write their data as a separate VTK DataArray */
           for(j=0;j<n_eles;j++)
             {
-              write_vtu << "		<Piece NumberOfPoints=\"" << n_points << "\" NumberOfCells=\"" << n_cells << "\">" << endl;
+              write_vtu << "		<Piece NumberOfPoints=\"" << n_points << "\" NumberOfCells=\"" << n_cells << "\">" << std::endl;
 
               /*! Calculate the prognostic (solution) fields at the plot points */
               FlowSol->mesh_eles(i)->calc_disu_ppts(j,disu_ppts_temp);
@@ -849,19 +857,19 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
               }
 
               /*! write out solution to file */
-              write_vtu << "			<PointData>" << endl;
+              write_vtu << "			<PointData>" << std::endl;
 
               /*! density */
-              write_vtu << "				<DataArray type= \"Float32\" Name=\"Density\" format=\"ascii\">" << endl;
+              write_vtu << "				<DataArray type= \"Float32\" Name=\"Density\" format=\"ascii\">" << std::endl;
               for(k=0;k<n_points;k++)
                 {
                   write_vtu << disu_ppts_temp(k,0) << " ";
                 }
-              write_vtu << endl;
-              write_vtu << "				</DataArray>" << endl;
+              write_vtu << std::endl;
+              write_vtu << "				</DataArray>" << std::endl;
 
               /*! velocity */
-              write_vtu << "				<DataArray type= \"Float32\" NumberOfComponents=\"3\" Name=\"Velocity\" format=\"ascii\">" << endl;
+              write_vtu << "				<DataArray type= \"Float32\" NumberOfComponents=\"3\" Name=\"Velocity\" format=\"ascii\">" << std::endl;
               for(k=0;k<n_points;k++)
                 {
                   /*! Divide momentum components by density to obtain velocity components */
@@ -878,11 +886,11 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
                       write_vtu << disu_ppts_temp(k,3)/disu_ppts_temp(k,0) << " ";
                     }
                 }
-              write_vtu << endl;
-              write_vtu << "				</DataArray>" << endl;
+              write_vtu << std::endl;
+              write_vtu << "				</DataArray>" << std::endl;
 
               /*! energy */
-              write_vtu << "				<DataArray type= \"Float32\" Name=\"Energy\" format=\"ascii\">" << endl;
+              write_vtu << "				<DataArray type= \"Float32\" Name=\"Energy\" format=\"ascii\">" << std::endl;
               for(k=0;k<n_points;k++)
                 {
                   /*! In 2D energy is the 4th solution component */
@@ -896,12 +904,12 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
                       write_vtu << disu_ppts_temp(k,4)/disu_ppts_temp(k,0) << " ";
                     }
                 }
-              write_vtu << endl;
-              write_vtu << "				</DataArray>" << endl;
+              write_vtu << std::endl;
+              write_vtu << "				</DataArray>" << std::endl;
 
               /*! modified turbulent viscosity */
               if (run_input.turb_model == 1) {
-                write_vtu << "				<DataArray type= \"Float32\" Name=\"Nu_Tilde\" format=\"ascii\">" << endl;
+                write_vtu << "				<DataArray type= \"Float32\" Name=\"Nu_Tilde\" format=\"ascii\">" << std::endl;
                 for(k=0;k<n_points;k++)
                 {
                   /*! In 2D nu_tilde is the 5th solution component */
@@ -916,13 +924,13 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
                   }
                 }
                 /*! End the line and finish writing DataArray and PointData objects */
-                write_vtu << endl;
-                write_vtu << "				</DataArray>" << endl;
+                write_vtu << std::endl;
+                write_vtu << "				</DataArray>" << std::endl;
               }
 
               if (run_input.motion) {
                 /*! grid velocity */
-                write_vtu << "				<DataArray type= \"Float32\" NumberOfComponents=\"3\" Name=\"GridVelocity\" format=\"ascii\">" << endl;
+                write_vtu << "				<DataArray type= \"Float32\" NumberOfComponents=\"3\" Name=\"GridVelocity\" format=\"ascii\">" << std::endl;
                 for(k=0;k<n_points;k++)
                 {
                   write_vtu << grid_vel_ppts_temp(0,k,j) << " " << grid_vel_ppts_temp(1,k,j) << " ";
@@ -938,47 +946,47 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
                     write_vtu << grid_vel_ppts_temp(2,k,j) << " ";
                   }
                 }
-                write_vtu << endl;
-                write_vtu << "				</DataArray>" << endl;
+                write_vtu << std::endl;
+                write_vtu << "				</DataArray>" << std::endl;
               }
 
               /*! Write out optional time-averaged diagnostic fields */
               for(m=0;m<n_average_fields;m++)
                 {
-                  write_vtu << "				<DataArray type= \"Float32\" Name=\"" << run_input.average_fields(m) << "\" format=\"ascii\">" << endl;
+                  write_vtu << "				<DataArray type= \"Float32\" Name=\"" << run_input.average_fields(m) << "\" format=\"ascii\">" << std::endl;
                   for(k=0;k<n_points;k++)
                     {
                       write_vtu << disu_average_ppts_temp(k,m) << " ";
                     }
 
                   /*! End the line and finish writing DataArray object */
-                  write_vtu << endl;
-                  write_vtu << "				</DataArray>" << endl;
+                  write_vtu << std::endl;
+                  write_vtu << "				</DataArray>" << std::endl;
                 }
 
               /*! Write out optional diagnostic fields */
               for(m=0;m<n_diag_fields;m++)
                 {
-                  write_vtu << "				<DataArray type= \"Float32\" Name=\"" << run_input.diagnostic_fields(m) << "\" format=\"ascii\">" << endl;
+                  write_vtu << "				<DataArray type= \"Float32\" Name=\"" << run_input.diagnostic_fields(m) << "\" format=\"ascii\">" << std::endl;
                   for(k=0;k<n_points;k++)
                     {
                       write_vtu << diag_ppts_temp(k,m) << " ";
                     }
 
                   /*! End the line and finish writing DataArray object */
-                  write_vtu << endl;
-                  write_vtu << "				</DataArray>" << endl;
+                  write_vtu << std::endl;
+                  write_vtu << "				</DataArray>" << std::endl;
                 }
 
               /*! finish writing PointData object */
-              write_vtu << "			</PointData>" << endl;
+              write_vtu << "			</PointData>" << std::endl;
 
               /*! Calculate the plot coordinates */
               FlowSol->mesh_eles(i)->calc_pos_ppts(j,pos_ppts_temp);
 
               /*! write out the plot coordinates */
-              write_vtu << "			<Points>" << endl;
-              write_vtu << "				<DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">" << endl;
+              write_vtu << "			<Points>" << std::endl;
+              write_vtu << "				<DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">" << std::endl;
 
               /*! Loop over plot points in element */
               for(k=0;k<n_points;k++)
@@ -995,15 +1003,15 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
                     }
                 }
 
-              write_vtu << endl;
-              write_vtu << "				</DataArray>" << endl;
-              write_vtu << "			</Points>" << endl;
+              write_vtu << std::endl;
+              write_vtu << "				</DataArray>" << std::endl;
+              write_vtu << "			</Points>" << std::endl;
 
               /*! write out Cell data: connectivity, offsets, element types */
-              write_vtu << "			<Cells>" << endl;
+              write_vtu << "			<Cells>" << std::endl;
 
               /*! Write connectivity array */
-              write_vtu << "				<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << endl;
+              write_vtu << "				<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">" << std::endl;
 
               for(k=0;k<n_cells;k++)
                 {
@@ -1011,38 +1019,38 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
                     {
                       write_vtu << con(l,k) << " ";
                     }
-                  write_vtu << endl;
+                  write_vtu << std::endl;
                 }
-              write_vtu << "				</DataArray>" << endl;
+              write_vtu << "				</DataArray>" << std::endl;
 
               /*! Write cell numbers */
-              write_vtu << "				<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << endl;
+              write_vtu << "				<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">" << std::endl;
               for(k=0;k<n_cells;k++)
                 {
                   write_vtu << (k+1)*n_verts << " ";
                 }
-              write_vtu << endl;
-              write_vtu << "				</DataArray>" << endl;
+              write_vtu << std::endl;
+              write_vtu << "				</DataArray>" << std::endl;
 
               /*! Write VTK element type */
-              write_vtu << "				<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">" << endl;
+              write_vtu << "				<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">" << std::endl;
               for(k=0;k<n_cells;k++)
                 {
                   write_vtu << vtktypes[i] << " ";
                 }
-              write_vtu << endl;
-              write_vtu << "				</DataArray>" << endl;
+              write_vtu << std::endl;
+              write_vtu << "				</DataArray>" << std::endl;
 
               /*! Write cell and piece footers */
-              write_vtu << "			</Cells>" << endl;
-              write_vtu << "		</Piece>" << endl;
+              write_vtu << "			</Cells>" << std::endl;
+              write_vtu << "		</Piece>" << std::endl;
             }
         }
     }
 
   /*! Write footer of file */
-  write_vtu << "	</UnstructuredGrid>" << endl;
-  write_vtu << "</VTKFile>" << endl;
+  write_vtu << "	</UnstructuredGrid>" << std::endl;
+  write_vtu << "</VTKFile>" << std::endl;
 
   /*! Close the .vtu file */
   write_vtu.close();
@@ -1050,7 +1058,7 @@ void write_vtu(int in_file_num, struct solution* FlowSol)
 #ifdef _MPI
 
 #else
-  cout << "done." << endl;
+  std::cout << "done." << std::endl;
 #endif
 }
 
@@ -1059,7 +1067,7 @@ void write_restart(int in_file_num, struct solution* FlowSol)
 
   char file_name_s[256], file_name_s2[256];
   char *file_name;
-  ofstream restart_file, restart_mesh;
+  std::ofstream restart_file, restart_mesh;
   restart_file.precision(15);
   restart_mesh.precision(15);
 
@@ -1067,23 +1075,23 @@ void write_restart(int in_file_num, struct solution* FlowSol)
 #ifdef _MPI
   sprintf(file_name_s,"Rest_%.09d_p%.04d.dat",in_file_num,FlowSol->rank);
   sprintf(file_name_s2,"Rest_%s_%.09d_p%.04d.dat",run_input.data_file_name.c_str(),in_file_num,FlowSol->rank);
-  if (FlowSol->rank==0) cout << "Writing Restart file number " << in_file_num << " ...." << endl;
+  if (FlowSol->rank==0) std::cout << "Writing Restart file number " << in_file_num << " ...." << std::endl;
 #else
   sprintf(file_name_s,"Rest_%.09d_p%.04d.dat",in_file_num,0);
   sprintf(file_name_s2,"Rest_%s_%.09d_p%.04d.dat",run_input.data_file_name.c_str(),in_file_num,0);
-  cout << "Writing Restart file number " << in_file_num << " ...." << endl;
+  std::cout << "Writing Restart file number " << in_file_num << " ...." << std::endl;
 #endif
 
 
   file_name = &file_name_s[0];
   restart_file.open(file_name);
 
-  restart_file << FlowSol->time << endl;
+  restart_file << FlowSol->time << std::endl;
 
   if (run_input.restart_mesh_out) {
     file_name = &file_name_s2[0];
     restart_mesh.open(file_name);
-    restart_mesh << FlowSol->time << endl;
+    restart_mesh << FlowSol->time << std::endl;
   }
 
   //header
@@ -1111,7 +1119,7 @@ void CalcForces(int in_file_num, struct solution* FlowSol) {
   char file_name_s[256], *file_name;
   char forcedir_s[256], *forcedir;
   struct stat st = {0};
-  ofstream coeff_file;
+  std::ofstream coeff_file;
   bool write_dir, write_forces;
   array<double> temp_inv_force(FlowSol->n_dims);
   array<double> temp_vis_force(FlowSol->n_dims);
@@ -1121,11 +1129,11 @@ void CalcForces(int in_file_num, struct solution* FlowSol) {
   // set write flags
   if (run_input.restart_flag==0) {
     write_dir = (in_file_num == 1);
-    write_forces = ((in_file_num % (run_input.monitor_cp_freq)) == 0) || (in_file_num == 1);
+    write_forces = (run_input.monitor_cp_freq > 0 && (in_file_num % (run_input.monitor_cp_freq)) == 0) || (in_file_num == 1);
   }
   else {
     write_dir = (in_file_num == run_input.restart_iter+1);
-    write_forces = ((in_file_num % (run_input.monitor_cp_freq)) == 0) || (in_file_num == run_input.restart_iter+1);
+    write_forces = (run_input.monitor_cp_freq > 0 && (in_file_num % (run_input.monitor_cp_freq)) == 0) || (in_file_num == run_input.restart_iter+1);
   }
 
   // set name of directory to store output files
@@ -1142,7 +1150,11 @@ void CalcForces(int in_file_num, struct solution* FlowSol) {
     {
       if (stat(forcedir, &st) == -1)
         {
+#ifdef _MSC_VER
+          _mkdir(forcedir);
+#else
           mkdir(forcedir, 0755);
+#endif
         }
     }
 
@@ -1349,12 +1361,12 @@ void compute_error(int in_file_num, struct solution* FlowSol)
         }
 
       for(int j=0;j<n_fields; j++) {
-          cout << scientific << " sol error, field " << j << " = " << setprecision(13) << error(0,j) << endl;
+          std::cout << std::scientific << " sol error, field " << j << " = " << std::setprecision(13) << error(0,j) << std::endl;
         }
       if(FlowSol->viscous)
         {
           for(int j=0;j<n_fields; j++) {
-              cout << scientific << " grad error, field " << j << " = " << setprecision(13) << error(1,j) << endl;
+              std::cout << std::scientific << " grad error, field " << j << " = " << std::setprecision(13) << error(1,j) << std::endl;
             }
         }
 
@@ -1370,25 +1382,25 @@ void compute_error(int in_file_num, struct solution* FlowSol)
     {
       sprintf(file_name_s,"error000.dat");
       file_name = &file_name_s[0];
-      ofstream write_error;
+      std::ofstream write_error;
 
-      write_error.open(file_name,ios::app);
+      write_error.open(file_name,std::ios::app);
       write_error << in_file_num << ", ";
       write_error <<  run_input.order << ", ";
-      write_error <<  scientific << run_input.c_tet << ", ";
+      write_error <<  std::scientific << run_input.c_tet << ", ";
       write_error << run_input.mesh_file << ", ";
       write_error << run_input.upts_type_tri << ", ";
       write_error << run_input.upts_type_quad << ", ";
       write_error << run_input.fpts_type_tri << ", ";
       write_error << run_input.adv_type << ", ";
       write_error << run_input.riemann_solve_type << ", ";
-      write_error << scientific << run_input.error_norm_type  << ", " ;
+      write_error << std::scientific << run_input.error_norm_type  << ", " ;
 
       for(int j=0;j<n_fields; j++) {
-          write_error << scientific << error(0,j);
+          write_error << std::scientific << error(0,j);
           if((j == (n_fields-1)) && FlowSol->viscous==0)
             {
-              write_error << endl;
+              write_error << std::endl;
             }
           else
             {
@@ -1398,10 +1410,10 @@ void compute_error(int in_file_num, struct solution* FlowSol)
 
       if(FlowSol->viscous) {
           for(int j=0;j<n_fields; j++) {
-              write_error << scientific << error(1,j);
+              write_error << std::scientific << error(1,j);
               if(j == (n_fields-1))
                 {
-                  write_error << endl;
+                  write_error << std::endl;
                 }
               else
                 {
@@ -1443,7 +1455,7 @@ void compute_error(int in_file_num, struct solution* FlowSol)
 
   if(r_flag)
     {
-      cout << "Tolerance achieved " << endl;
+      std::cout << "Tolerance achieved " << std::endl;
       exit(0);
     }
 
@@ -1522,7 +1534,7 @@ void CalcNormResidual(struct solution* FlowSol) {
   }
 }
 
-void HistoryOutput(int in_file_num, clock_t init, ofstream *write_hist, struct solution* FlowSol) {
+void HistoryOutput(int in_file_num, clock_t init, std::ofstream *write_hist, struct solution* FlowSol) {
   
   int i, n_fields;
   clock_t final;
@@ -1553,9 +1565,9 @@ void HistoryOutput(int in_file_num, clock_t init, ofstream *write_hist, struct s
     // Open history file
     if (open_hist) {
 
-      write_hist->open("history.plt", ios::out);
+      write_hist->open("history.plt", std::ios::out);
       write_hist->precision(15);
-      write_hist[0] << "TITLE = \"HiFiLES simulation\"" << endl;
+      write_hist[0] << "TITLE = \"HiFiLES simulation\"" << std::endl;
       
       write_hist[0] << "VARIABLES = \"Iteration\"";
       
@@ -1568,36 +1580,36 @@ void HistoryOutput(int in_file_num, clock_t init, ofstream *write_hist, struct s
         write_hist[0] << ",\"Diagnostics[" << i << "]\"";
 
       // Add physical and computational time
-      write_hist[0] << ",\"Time<sub>Physical</sub>\",\"Time<sub>Comp</sub>(m)\"" << endl;
+      write_hist[0] << ",\"Time<sub>Physical</sub>\",\"Time<sub>Comp</sub>(m)\"" << std::endl;
       
-      write_hist[0] << "ZONE T= \"Convergence history\"" << endl;
+      write_hist[0] << "ZONE T= \"Convergence history\"" << std::endl;
     }
     
     // Write the header
     if (write_heads) {
       if (FlowSol->n_dims==2) {
-        if (n_fields == 4) cout << "\n  Iter       Res[Rho]   Res[RhoVelx]   Res[RhoVely]      Res[RhoE]       Fx_Total       Fy_Total" << endl;
-        else cout << "\n  Iter       Res[Rho]   Res[RhoVelx]   Res[RhoVely]      Res[RhoE]   Res[MuTilde]       Fx_Total       Fy_Total" << endl;
+        if (n_fields == 4) std::cout << "\n  Iter       Res[Rho]   Res[RhoVelx]   Res[RhoVely]      Res[RhoE]       Fx_Total       Fy_Total" << std::endl;
+        else std::cout << "\n  Iter       Res[Rho]   Res[RhoVelx]   Res[RhoVely]      Res[RhoE]   Res[MuTilde]       Fx_Total       Fy_Total" << std::endl;
       }
       else {
-        if (n_fields == 5) cout <<  "\n  Iter       Res[Rho]   Res[RhoVelx]   Res[RhoVely]   Res[RhoVelz]      Res[RhoE]       Fx_Total       Fy_Total       Fz_Total" << endl;
-        else cout <<  "\n  Iter       Res[Rho]   Res[RhoVelx]   Res[RhoVely]   Res[RhoVelz]      Res[RhoE]   Res[MuTilde]       Fx_Total       Fy_Total       Fz_Total" << endl;
+        if (n_fields == 5) std::cout <<  "\n  Iter       Res[Rho]   Res[RhoVelx]   Res[RhoVely]   Res[RhoVelz]      Res[RhoE]       Fx_Total       Fy_Total       Fz_Total" << std::endl;
+        else std::cout <<  "\n  Iter       Res[Rho]   Res[RhoVelx]   Res[RhoVely]   Res[RhoVelz]      Res[RhoE]   Res[MuTilde]       Fx_Total       Fy_Total       Fz_Total" << std::endl;
       }
     }
     
     // Output residuals
-    cout.precision(8);
-    cout.setf(ios::fixed, ios::floatfield);
-    cout.width(6); cout << in_file_num;
+    std::cout.precision(8);
+    std::cout.setf(std::ios::fixed, std::ios::floatfield);
+    std::cout.width(6); std::cout << in_file_num;
     write_hist[0] << in_file_num;
     for(i=0; i<n_fields; i++) {
-      cout.width(15); cout << FlowSol->norm_residual(i);
+      std::cout.width(15); std::cout << FlowSol->norm_residual(i);
       write_hist[0] << ", " << log10(FlowSol->norm_residual(i));
     }
     
     // Output forces
     for(i=0; i< FlowSol->n_dims; i++) {
-      cout.width(15); cout << FlowSol->inv_force(i) + FlowSol->vis_force(i);
+      std::cout.width(15); std::cout << FlowSol->inv_force(i) + FlowSol->vis_force(i);
       write_hist[0] << ", " << FlowSol->inv_force(i) + FlowSol->vis_force(i);
     }
     
@@ -1613,7 +1625,7 @@ void HistoryOutput(int in_file_num, clock_t init, ofstream *write_hist, struct s
     
     // Compute execution time
     final = clock()-init;
-    write_hist[0] << ", " << (double) final/(((double) CLOCKS_PER_SEC) * 60.0) << endl;
+    write_hist[0] << ", " << (double) final/(((double) CLOCKS_PER_SEC) * 60.0) << std::endl;
   }
 }
 
@@ -1679,13 +1691,13 @@ void check_stability(struct solution* FlowSol)
 
 
   //file input
-  ifstream read_time;
-  read_time.open("time_step.dat",ios::in);
+  std::ifstream read_time;
+  read_time.open("time_step.dat", std::ios::in);
   read_time.precision(12);
 
   //file output
-  ofstream write_time;
-  write_time.open("temp.dat",ios::out);
+  std::ofstream write_time;
+  write_time.open("temp.dat", std::ios::out);
   write_time.precision(12);
 
   if(bisect_ind > 0)
@@ -1694,12 +1706,12 @@ void check_stability(struct solution* FlowSol)
         {
           read_time >> c_file >> a_file >> b_file;
 
-          cout << c_file << " " << a_file << " " << b_file << endl;
+          std::cout << c_file << " " << a_file << " " << b_file << std::endl;
 
           if(i == (file_lines-1))
             {
-              cout << "Writing to time step file ..." << endl;
-              write_time << c_now << " " << a_temp << " " << b_temp << endl;
+              std::cout << "Writing to time step file ..." << std::endl;
+              write_time << c_now << " " << a_temp << " " << b_temp << std::endl;
 
               read_time.close();
               write_time.close();
@@ -1709,7 +1721,7 @@ void check_stability(struct solution* FlowSol)
             }
           else
             {
-              write_time << c_file << " " << a_file << " " << b_file << endl;
+              write_time << c_file << " " << a_file << " " << b_file << std::endl;
             }
         }
     }
@@ -1720,11 +1732,11 @@ void check_stability(struct solution* FlowSol)
       for(int i=0; i<file_lines; i++)
         {
           read_time >> c_file >> a_file >> b_file;
-          write_time << c_file << " " << a_file << " " << b_file << endl;
+          write_time << c_file << " " << a_file << " " << b_file << std::endl;
         }
 
-      cout << "Writing to time step file ..." << endl;
-      write_time << c_now << " " << a_temp << " " << b_temp << endl;
+      std::cout << "Writing to time step file ..." << std::endl;
+      write_time << c_now << " " << a_temp << " " << b_temp << std::endl;
 
       read_time.close();
       write_time.close();
